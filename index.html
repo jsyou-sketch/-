@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLACKFILM — 일본환자 유치 상담회 대시보드</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{--gold:#C9A84C;--gold-light:#E8CC7A;--gold-dim:#7a6432;--black:#0A0A0A;--g900:#111111;--g800:#1A1A1A;--g700:#252525;--g600:#333333;--g500:#555555;--g400:#888888;--g300:#AAAAAA;--g200:#CCCCCC;--white:#F5F3EF}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--black);color:var(--white);font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:13px;min-height:100vh;
+    background-image:radial-gradient(ellipse at 10% 0%,rgba(201,168,76,.06) 0%,transparent 50%),radial-gradient(ellipse at 90% 100%,rgba(201,168,76,.04) 0%,transparent 50%)}
+  ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--g900)}::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:2px}
+
+  .card{background:var(--g800);border:1px solid rgba(201,168,76,.18);border-radius:3px;position:relative;overflow:hidden}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5}
+  .kpi-card{background:linear-gradient(135deg,var(--g800),var(--g900));border:1px solid rgba(201,168,76,.2);border-radius:3px;padding:14px 18px;transition:border-color .3s;position:relative;overflow:hidden}
+  .kpi-card:hover{border-color:rgba(201,168,76,.45)}
+  .kpi-lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--g400);margin-bottom:4px;font-weight:700}
+  .kpi-val{font-size:22px;font-weight:700;color:var(--white);line-height:1.2}
+  .kpi-sub{font-size:10px;color:var(--g500);margin-top:4px}
+  .sec-hdr{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid rgba(201,168,76,.15);background:rgba(201,168,76,.03)}
+  .sec-num{font-size:16px;color:var(--gold);font-weight:700;min-width:24px}
+  .sec-ttl{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--g200);font-weight:700}
+  .sec-sub{font-size:10px;color:var(--g500);margin-top:1px}
+
+  .inp{background:var(--g900);border:1px solid rgba(201,168,76,.22);border-radius:2px;color:var(--white);padding:6px 9px;font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:12px;width:100%;outline:none;transition:border-color .2s,box-shadow .2s}
+  .inp:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.12)}
+  .inp::placeholder{color:var(--g500)}
+  select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23C9A84C' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px;cursor:pointer}
+  textarea.inp{resize:vertical;min-height:56px;line-height:1.6}
+  .lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g400);margin-bottom:3px;display:block}
+
+  .cell-inp{background:transparent;border:none;border-bottom:1px solid rgba(201,168,76,.3);color:var(--white);font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:12px;font-weight:700;text-align:right;outline:none;width:100%;padding:2px 4px;transition:border-color .2s}
+  .cell-inp:focus{border-bottom-color:var(--gold);background:rgba(201,168,76,.06)}
+  .cell-inp.ro{border-color:transparent;color:var(--gold-light);cursor:default}
+  .cell-inp.dv{color:#86efac}
+
+  .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#000;border:none;padding:6px 13px;font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:2px;transition:opacity .2s,transform .1s;white-space:nowrap}
+  .btn-gold:hover{opacity:.88;transform:translateY(-1px)}
+  .btn-out{background:transparent;color:var(--g200);border:1px solid rgba(255,255,255,.18);padding:6px 13px;font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:2px}
+  .btn-out:hover{border-color:rgba(255,255,255,.4)}
+  .btn-del{background:rgba(220,38,38,.12);color:#f87171;border:1px solid rgba(220,38,38,.3);padding:5px 11px;font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:2px}
+  .btn-del:hover{background:rgba(220,38,38,.25)}
+  .btn-sm{padding:3px 8px;font-size:10px;background:rgba(201,168,76,.1);color:var(--gold-light);border:1px solid rgba(201,168,76,.25);font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-weight:700;cursor:pointer;border-radius:2px;white-space:nowrap}
+  .btn-sm:hover{background:rgba(201,168,76,.22)}
+  .btn-save{background:rgba(134,239,172,.12);color:#86efac;border:1px solid rgba(134,239,172,.3);padding:5px 14px;font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:2px}
+  .btn-save:hover{background:rgba(134,239,172,.22)}
+  .btn-edit{background:rgba(201,168,76,.1);color:var(--gold-light);border:1px solid rgba(201,168,76,.28);padding:5px 14px;font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:2px}
+  .btn-edit:hover{background:rgba(201,168,76,.2)}
+
+  .gdiv{height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.32),transparent);margin:10px 0}
+  .pbar{height:3px;background:var(--g700);border-radius:2px;overflow:hidden;margin-top:6px}
+  .pfill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold-light));border-radius:2px;transition:width .5s ease}
+  /* 숨김 토글 */
+  .sec-body{transition:max-height .35s ease,opacity .35s ease,padding .35s ease;overflow:hidden}
+  .sec-body.collapsed{max-height:0!important;opacity:0;padding-top:0!important;padding-bottom:0!important}
+  .toggle-btn{background:none;border:none;cursor:pointer;color:var(--g400);font-size:16px;padding:2px 6px;line-height:1;transition:transform .3s,color .2s;user-select:none}
+  .toggle-btn:hover{color:var(--gold-light)}
+  .toggle-btn.collapsed{transform:rotate(-90deg)}
+  /* 숨김 모드일 때 카드 하단선 제거 */
+  .card.sec-collapsed::before{opacity:0}
+
+  .ticker{height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-light),var(--gold),transparent);animation:shim 3s infinite}
+  @keyframes shim{0%,100%{opacity:.3}50%{opacity:.8}}
+
+  /* 수가표 팝업 (모달 내부용) */
+  .price-popup{background:var(--g900);border:1px solid rgba(201,168,76,.3);border-radius:3px;overflow:hidden;margin-top:8px}
+  .price-popup-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,.18);background:rgba(201,168,76,.04)}
+  .price-popup-tab{flex:1;padding:6px 4px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;border:none;background:transparent;color:var(--g400);font-family:'Malgun Gothic',sans-serif;transition:all .18s;border-bottom:2px solid transparent}
+  .price-popup-tab.active{color:var(--gold-light);border-bottom-color:var(--gold);background:rgba(201,168,76,.07)}
+  .price-popup-tab:hover:not(.active){color:var(--g200)}
+  .ppanel{display:none}.ppanel.active{display:block}
+  .ptbl-sm{width:100%;border-collapse:collapse;font-size:11px}
+  .ptbl-sm th{padding:5px 8px;font-size:9px;letter-spacing:.1em;color:var(--gold);border-bottom:1px solid rgba(201,168,76,.2);background:rgba(201,168,76,.05);font-weight:700;text-align:right;white-space:nowrap}
+  .ptbl-sm th:first-child{text-align:center;width:48px}
+  .ptbl-sm td{padding:5px 8px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);color:var(--g200);vertical-align:middle;cursor:pointer}
+  .ptbl-sm td:first-child{text-align:center;color:var(--gold);font-weight:700}
+  .ptbl-sm tr:hover td{background:rgba(201,168,76,.1)!important;color:var(--white)!important}
+  .ptbl-sm tr.psel td{background:rgba(201,168,76,.2)!important;color:var(--white)!important;font-weight:700}
+  /* 스케줄 그리드: 메모 컬럼 추가 */
+  .sch-hdr{grid-template-columns:70px 58px 110px 64px 110px 72px 88px 88px 140px 58px!important}
+  .sch-row{grid-template-columns:70px 58px 110px 64px 110px 72px 88px 88px 140px 58px!important}
+
+  /* 수가표 → 시뮬레이션 연동 */
+
+  .ptbl tr.linked:not(.em){background:rgba(201,168,76,.18)!important;outline:2px solid var(--gold);outline-offset:-1px}
+  .ptbl tr.linked td{color:var(--white)!important}
+  @keyframes flashGold{0%{background:rgba(201,168,76,.35)}100%{background:transparent}}
+  .flash-gold{animation:flashGold .6s ease}
+  /* 툴바 선택 표시 */
+  .np-selected-badge{display:none;align-items:center;gap:6px;padding:4px 10px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.35);border-radius:2px;font-size:11px;color:var(--gold-light);font-weight:700;white-space:nowrap}
+  .np-selected-badge.show{display:flex}
+  /* 예약금 토글 버튼 */
+  .dep-toggle{display:flex;border:1px solid rgba(201,168,76,.3);border-radius:2px;overflow:hidden;height:32px}
+  .dep-toggle button{flex:1;border:none;cursor:pointer;font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:11px;font-weight:700;transition:all .18s;padding:0 10px;white-space:nowrap}
+  .dep-toggle button.dt-off{background:rgba(255,255,255,.04);color:var(--g400)}
+  .dep-toggle button.dt-off:hover{background:rgba(255,255,255,.08);color:var(--g200)}
+  .dep-toggle button.dt-on{background:rgba(253,230,138,.18);color:#fde68a;border-left:1px solid rgba(253,230,138,.3)}
+  .dep-toggle button.dt-on:hover{background:rgba(253,230,138,.28)}
+  .dep-toggle button.active-off{background:rgba(248,113,113,.12)!important;color:#f87171!important}
+  .dep-toggle button.active-on{background:rgba(253,230,138,.3)!important;color:#fde68a!important;box-shadow:inset 0 0 0 1px rgba(253,230,138,.5)}
+
+  /* 서브탭 */
+
+  .stab{padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);font-family:'Malgun Gothic','맑은 고딕',sans-serif;background:transparent;color:var(--g400);border-radius:2px;transition:all .2s;white-space:nowrap}
+  .stab.active{background:rgba(201,168,76,.12);color:var(--gold-light);border-color:rgba(201,168,76,.35)}
+  .stab:not(.active):hover{color:var(--g200)}
+
+  /* 가격표 */
+  .ptbl{width:100%;border-collapse:collapse;font-size:12px}
+  .ptbl th{padding:7px 10px;font-size:10px;letter-spacing:.1em;color:var(--gold);border-bottom:1px solid rgba(201,168,76,.22);background:rgba(201,168,76,.05);font-weight:700;white-space:nowrap;text-align:right}
+  .ptbl th:first-child{text-align:center}
+  .ptbl td{padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+  .ptbl td:first-child{text-align:center;color:var(--gold);font-weight:700;font-size:13px}
+  .ptbl tr:hover td{background:rgba(201,168,76,.04);cursor:pointer}
+  .ptbl tr.sel td{background:rgba(201,168,76,.12)!important}
+  .ptbl tr.sel td:first-child{color:var(--gold-light)!important}
+  .em{background:rgba(255,255,255,.02)!important}
+
+  /* 결과박스 */
+  .res-box{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.22);border-radius:2px;padding:12px 16px}
+
+  /* 매출표 */
+  .rev-tbl{width:100%;border-collapse:collapse;font-size:12px}
+  .rev-tbl th{padding:8px 12px;font-size:10px;letter-spacing:.1em;color:var(--gold);border-bottom:1px solid rgba(201,168,76,.22);background:rgba(201,168,76,.05);font-weight:700;white-space:nowrap;text-align:right}
+  .rev-tbl th:first-child{text-align:left}
+  .rev-tbl td{padding:7px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;font-size:12px}
+  .rev-tbl td:first-child{text-align:left;color:var(--g300)}
+  .rev-tbl tr.total-row td{background:rgba(201,168,76,.07);font-weight:700;border-top:1px solid rgba(201,168,76,.22)}
+  .rev-tbl tr.total-row td:first-child{color:var(--gold-light)}
+  .rev-inp{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);border-radius:2px;color:var(--white);font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:12px;font-weight:700;text-align:right;outline:none;padding:4px 8px;width:90px;transition:border-color .2s}
+  .rev-inp:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.12)}
+  .pct-inp{width:70px}
+
+  /* 스테퍼 */
+  .stepper{display:flex;align-items:center;gap:7px}
+  .step-btn{width:26px;height:26px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.32);color:var(--gold-light);cursor:pointer;border-radius:2px;font-size:17px;display:flex;align-items:center;justify-content:center;font-weight:700;transition:background .15s}
+  .step-btn:hover{background:rgba(201,168,76,.28)}
+  .step-val{font-size:18px;font-weight:700;color:var(--white);min-width:30px;text-align:center}
+
+  /* 스케줄 */
+  .sch-wrap{overflow-x:auto}
+  .sch-hdr{display:grid;grid-template-columns:70px 58px 128px 70px 108px 90px 100px 100px 66px;background:rgba(201,168,76,.07);border-bottom:1px solid rgba(201,168,76,.22);min-width:790px}
+  .sch-hc{padding:7px 7px;font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold);border-right:1px solid rgba(201,168,76,.12);font-weight:700;white-space:nowrap}
+  .sch-row{display:grid;grid-template-columns:70px 58px 128px 70px 108px 90px 100px 100px 66px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;min-width:790px;min-height:44px}
+  .sch-row:hover{background:rgba(201,168,76,.04)}
+  .sch-row.booked{background:linear-gradient(90deg,rgba(201,168,76,.07),transparent)}
+  .sch-row.hour-start{border-top:1px solid rgba(201,168,76,.18)}
+  .sch-row.mgr-b{background:rgba(255,255,255,.013)}
+  .sch-row.mgr-b.booked{background:linear-gradient(90deg,rgba(100,149,237,.07),transparent)}
+  .sch-cell{padding:5px 7px;border-right:1px solid rgba(255,255,255,.04);display:flex;align-items:center;font-size:11px}
+  .sch-cell:last-child{border-right:none}
+  .time-lbl{font-size:11px;color:var(--gold);font-weight:700}
+  .ba{font-size:9px;font-weight:700;padding:1px 5px;background:rgba(201,168,76,.12);color:var(--gold-light);border:1px solid rgba(201,168,76,.3);border-radius:2px;white-space:nowrap}
+  .bb{font-size:9px;font-weight:700;padding:1px 5px;background:rgba(100,149,237,.12);color:#93c5fd;border:1px solid rgba(100,149,237,.3);border-radius:2px;white-space:nowrap}
+  .sbadge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px;white-space:nowrap}
+  .sb-ok{background:rgba(134,239,172,.12);color:#86efac;border:1px solid rgba(134,239,172,.28)}
+  .sb-wt{background:rgba(253,230,138,.12);color:#fde68a;border:1px solid rgba(253,230,138,.28)}
+  .sb-qi{background:rgba(147,197,253,.12);color:#93c5fd;border:1px solid rgba(147,197,253,.28)}
+  .sb-cx{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.22)}
+
+  /* 모달 */
+  .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+  .modal-ov.active{opacity:1;pointer-events:all}
+  .modal-box{background:var(--g800);border:1px solid rgba(201,168,76,.35);border-radius:3px;width:460px;max-width:96vw;max-height:92vh;overflow-y:auto;transform:translateY(14px);transition:transform .22s}
+  .modal-ov.active .modal-box{transform:translateY(0)}
+
+  /* 토스트 */
+  .toast{position:fixed;bottom:24px;right:24px;background:rgba(134,239,172,.15);border:1px solid rgba(134,239,172,.4);color:#86efac;padding:10px 18px;border-radius:3px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+  .toast.show{opacity:1}
+
+  /* 메인 탭 */
+  .main-tabs{display:flex;gap:0;border-bottom:2px solid rgba(201,168,76,.2);margin-bottom:20px}
+  .main-tab{padding:10px 28px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--g400);font-family:'Malgun Gothic','맑은 고딕',sans-serif;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;letter-spacing:.04em}
+  .main-tab.active{color:var(--gold-light);border-bottom-color:var(--gold);background:rgba(201,168,76,.05)}
+  .main-tab:hover:not(.active){color:var(--g200);background:rgba(255,255,255,.03)}
+  .tab-panel{display:none}.tab-panel.active{display:flex;flex-direction:column;gap:16px}
+  /* 차트 */
+  .chart-bar-wrap{background:var(--g900);border-radius:2px;overflow:hidden;height:18px;position:relative}
+  .chart-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+  .chart-bar-kr{background:linear-gradient(90deg,#3b82f6,#93c5fd)}
+  .chart-bar-jp{background:linear-gradient(90deg,#16a34a,#86efac)}
+  .chart-bar-cost{background:linear-gradient(90deg,#666,#999)}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat-card{background:var(--g900);border:1px solid rgba(201,168,76,.15);border-radius:2px;padding:14px 16px}
+  .val-pos{color:#86efac}.val-neg{color:#f87171}.val-gold{color:var(--gold-light)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .fu{animation:fadeUp .4s ease forwards}
+
+  /* 10% 할인 배지 */
+  .disc10-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(253,230,138,.12);border:1px solid rgba(253,230,138,.3);color:#fde68a;padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700;letter-spacing:.06em}
+</style>
+</head>
+<body>
+<div class="toast" id="toast">✓ 저장 완료</div>
+
+<!-- HEADER -->
+<header style="background:linear-gradient(180deg,rgba(201,168,76,.07) 0%,transparent 100%);border-bottom:1px solid rgba(201,168,76,.2)">
+  <div style="max-width:1480px;margin:0 auto;padding:11px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="font-size:20px;font-weight:700;letter-spacing:.28em;color:var(--gold)">BLACKFILM</div>
+      <div style="width:1px;height:28px;background:rgba(201,168,76,.3)"></div>
+      <div>
+        <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--g400)">일본환자 유치 상담회</div>
+        <div style="font-size:10px;color:var(--g300);margin-top:1px;font-weight:700">Operation &amp; P&amp;L Dashboard</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><label class="lbl" style="margin-bottom:2px">상담회 일자</label><input type="date" id="event-date" class="inp" style="width:138px;font-size:11px"></div>
+      <div><label class="lbl" style="margin-bottom:2px">장소</label><input type="text" id="event-location" class="inp" placeholder="장소 입력" style="width:155px;font-size:11px"></div>
+    </div>
+  </div>
+  <div class="ticker"></div>
+</header>
+
+<main style="max-width:1480px;margin:0 auto;padding:18px 22px">
+
+<!-- ── 메인 탭 네비게이션 ── -->
+<div class="main-tabs">
+  <button class="main-tab active" id="mtab-ops" onclick="switchMainTab('ops')">📋 당일 운영</button>
+  <button class="main-tab" id="mtab-stats" onclick="switchMainTab('stats')">📊 매출 통계</button>
+</div>
+
+<!-- ══ 탭 A: 당일 운영 ══ -->
+<div id="panel-ops" class="tab-panel active">
+
+<!-- ══ 01 비용 구조는 매출통계 탭으로 이동 → 숨김 엘리먼트만 유지 ══ -->
+<!-- KPI hidden elements (통계탭에서 업데이트, 당일운영탭에 표시 안 함) -->
+<span id="kpi-cost" style="display:none">₩0</span>
+<span id="kpi-rev" style="display:none">₩0</span>
+<span id="kpi-rev-kr" style="display:none">₩0</span>
+<span id="kpi-rev-jp" style="display:none">₩0</span>
+<span id="kpi-profit" style="display:none">₩0</span>
+<span id="kpi-roi" style="display:none">0%</span>
+<span id="pg-cost" style="display:none"></span>
+<span id="pg-rev" style="display:none"></span>
+<span id="pg-rev-kr" style="display:none"></span>
+<span id="pg-rev-jp" style="display:none"></span>
+<span id="pg-profit" style="display:none"></span>
+<span id="pg-roi" style="display:none"></span>
+
+
+<!-- ══ 02 수가표 (일본 수가 기준) ══ -->
+<section class="card fu">
+  <div class="sec-hdr" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="sec-num">02</span>
+      <div>
+        <div class="sec-ttl">블랙필름 수가표 — Price Calculator</div>
+        <div class="sec-sub">일본 파트너사 수가 기준 · 단가·할인율 직접 입력 후 저장 · 합계 자동 계산</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span class="disc10-badge">🎫 당일 예약금 10% 결제 시 10% 할인</span>
+      <button class="toggle-btn" id="tog-02" onclick="toggleSec('02')" title="숨기기/펼치기">▾</button>
+    </div>
+  </div>
+
+  <!-- 서브탭 -->
+  <div id="body-02" class="sec-body" style="max-height:3000px">
+  <div style="padding:12px 20px;border-bottom:1px solid rgba(201,168,76,.1);display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="stab active" id="st-norm" onclick="switchSub('norm')">정가표</button>
+      <button class="stab" id="st-rnose" onclick="switchSub('rnose')">리뷰할인 (코밑사진)</button>
+      <button class="stab" id="st-rface" onclick="switchSub('rface')">리뷰할인 (얼굴전체)</button>
+      <button class="stab" id="st-qty" onclick="switchSub('qty')">갯수할인</button>
+    </div>
+    <div id="cur-edit-btns" style="display:flex;gap:6px">
+      <button class="btn-edit" id="edit-btn" onclick="toggleEdit()">✏️ 수정</button>
+      <button class="btn-save" id="save-btn" onclick="saveCurrentTable()" style="display:none">✓ 저장</button>
+    </div>
+  </div>
+
+  <div style="padding:16px 20px">
+    <!-- 정가표 -->
+    <div id="sp-norm">
+      <div style="font-size:11px;color:var(--g400);line-height:1.7;margin-bottom:10px">
+        · 정가 기준 단가 · 할인 없음 · 행 클릭 시 <span class="disc10-badge" style="padding:1px 6px;font-size:9px">당일 예약금 10% 할인 금액</span> 포함 결과 표시
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ptbl" id="tbl-norm">
+          <thead><tr>
+            <th style="text-align:center;width:55px">갯수</th>
+            <th style="width:150px">단가 (₩)</th>
+            <th style="width:160px">합계 (₩)</th>
+            <th style="width:160px">당일 예약금 10% 결제 시 10%↓ (₩)</th>
+          </tr></thead>
+          <tbody id="tbody-norm"></tbody>
+        </table>
+      </div>
+      <div id="rb-norm" style="margin-top:12px"></div>
+    </div>
+
+    <!-- 코밑리뷰 -->
+    <div id="sp-rnose" style="display:none">
+      <div style="font-size:11px;color:var(--g400);line-height:1.7;margin-bottom:10px">
+        · 코밑 사진 리뷰 제공 시 적용 · 단가 또는 할인율 입력 시 나머지 자동 계산 · 당일 예약금 10% 결제 시 추가 10% 할인
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ptbl" id="tbl-rnose">
+          <thead><tr>
+            <th style="text-align:center;width:55px">갯수</th>
+            <th style="width:130px">정가 단가 (₩)</th>
+            <th style="width:70px">할인율 (%)</th>
+            <th style="width:130px">할인 단가 (₩)</th>
+            <th style="width:145px">합계 (₩)</th>
+            <th style="width:155px">당일 예약금 10% 결제 시 10%↓ (₩)</th>
+          </tr></thead>
+          <tbody id="tbody-rnose"></tbody>
+        </table>
+      </div>
+      <div id="rb-rnose" style="margin-top:12px"></div>
+    </div>
+
+    <!-- 얼굴리뷰 -->
+    <div id="sp-rface" style="display:none">
+      <div style="font-size:11px;color:var(--g400);line-height:1.7;margin-bottom:10px">
+        · 얼굴 전체 사진 리뷰 제공 시 적용 · 단가 또는 할인율 입력 시 나머지 자동 계산 · 당일 예약금 10% 결제 시 추가 10% 할인
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ptbl" id="tbl-rface">
+          <thead><tr>
+            <th style="text-align:center;width:55px">갯수</th>
+            <th style="width:130px">정가 단가 (₩)</th>
+            <th style="width:70px">할인율 (%)</th>
+            <th style="width:130px">할인 단가 (₩)</th>
+            <th style="width:145px">합계 (₩)</th>
+            <th style="width:155px">당일 예약금 10% 결제 시 10%↓ (₩)</th>
+          </tr></thead>
+          <tbody id="tbody-rface"></tbody>
+        </table>
+      </div>
+      <div id="rb-rface" style="margin-top:12px"></div>
+    </div>
+
+    <!-- 갯수할인 -->
+    <div id="sp-qty" style="display:none">
+      <div style="font-size:11px;color:var(--g400);line-height:1.7;margin-bottom:10px">
+        · 리뷰 조건 없음 · 갯수에 따른 자동 할인율 적용 · 단가 또는 할인율 입력 시 나머지 자동 계산 · 당일 예약금 10% 결제 시 추가 10% 할인
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ptbl" id="tbl-qty">
+          <thead><tr>
+            <th style="text-align:center;width:55px">갯수</th>
+            <th style="width:130px">정가 단가 (₩)</th>
+            <th style="width:70px">할인율 (%)</th>
+            <th style="width:130px">할인 단가 (₩)</th>
+            <th style="width:145px">합계 (₩)</th>
+            <th style="width:155px">당일 예약금 10% 결제 시 10%↓ (₩)</th>
+          </tr></thead>
+          <tbody id="tbody-qty"></tbody>
+        </table>
+      </div>
+      <div id="rb-qty" style="margin-top:12px"></div>
+    </div>
+  </div>
+  </div><!-- /sec-body-02 -->
+</section>
+
+<!-- ══ 03 매출 상세 → 매출 통계 탭으로 이동 ══ -->
+<div class="card fu" style="border-color:rgba(201,168,76,.2)">
+  <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:16px;color:var(--gold);font-weight:700">03</span>
+      <div>
+        <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--g200);font-weight:700">매출 상세 — Revenue Detail</div>
+        <div style="font-size:10px;color:var(--g500);margin-top:1px">환자별 매출은 <strong style="color:var(--gold-light)">📊 매출 통계 탭</strong>에서 확인·입력 가능합니다</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;color:var(--g500);letter-spacing:.12em;text-transform:uppercase">총 환자</div><div id="ops-pt-cnt" style="font-size:15px;font-weight:700;color:var(--gold-light)">0명</div></div>
+      <div style="width:1px;height:22px;background:rgba(201,168,76,.2)"></div>
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;color:var(--g500);letter-spacing:.12em;text-transform:uppercase">🇰🇷 한국 귀속</div><div id="ops-kr-rev" style="font-size:15px;font-weight:700;color:#93c5fd">₩0</div></div>
+      <div style="width:1px;height:22px;background:rgba(201,168,76,.2)"></div>
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;color:var(--g500);letter-spacing:.12em;text-transform:uppercase">🇯🇵 일본 귀속</div><div id="ops-jp-rev" style="font-size:15px;font-weight:700;color:#86efac">₩0</div></div>
+      <button class="btn-gold" onclick="switchMainTab('stats')" style="padding:6px 14px;font-size:11px">📊 매출 통계 탭 열기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 04 스케줄러 ══ -->
+<section class="card fu">
+  <div class="sec-hdr" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="sec-num">04</span>
+      <div><div class="sec-ttl">당일 스케줄러 — Appointment Scheduler</div><div class="sec-sub">09:00 — 19:00 · 1시간당 실장 A/B 각 1명 담당</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g500)">등록 환자</div><div id="sch-count" style="font-size:15px;font-weight:700;color:var(--gold-light)">0명</div></div>
+      <div style="width:1px;height:24px;background:rgba(201,168,76,.2)"></div>
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g500)">총 블랙필름</div><div id="sch-films" style="font-size:15px;font-weight:700;color:var(--gold-light)">0개</div></div>
+      <div style="width:1px;height:24px;background:rgba(201,168,76,.2)"></div>
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g500)">예약금 합계</div><div id="sch-deposit" style="font-size:15px;font-weight:700;color:var(--gold-light)">₩0</div></div>
+      <div style="width:1px;height:24px;background:rgba(201,168,76,.2)"></div>
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g500)">예상 매출</div><div id="sch-rev" style="font-size:15px;font-weight:700;color:var(--gold-light)">₩0</div></div>
+    </div>
+    <button class="toggle-btn" id="tog-04" onclick="toggleSec('04')" title="숨기기/펼치기">▾</button>
+  </div>
+  <div id="body-04" class="sec-body" style="max-height:5000px">
+  <div style="padding:8px 20px;background:rgba(201,168,76,.03);border-bottom:1px solid rgba(201,168,76,.1);display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <span style="font-size:10px;font-weight:700;color:var(--g400);letter-spacing:.1em;text-transform:uppercase">실장 설정</span>
+    <div style="display:flex;align-items:center;gap:6px"><span class="ba">실장 A</span><input type="text" id="mgr-a" class="inp" value="실장 A" style="width:96px;font-size:11px" oninput="renderSchedule()"></div>
+    <div style="display:flex;align-items:center;gap:6px"><span class="bb">실장 B</span><input type="text" id="mgr-b" class="inp" value="실장 B" style="width:96px;font-size:11px" oninput="renderSchedule()"></div>
+  </div>
+  <div class="sch-wrap">
+    <div class="sch-hdr">
+      <div class="sch-hc">시간</div><div class="sch-hc">담당</div><div class="sch-hc">환자명</div>
+      <div class="sch-hc">상태</div><div class="sch-hc">시술 항목</div><div class="sch-hc">블랙필름</div>
+      <div class="sch-hc">예약금 (₩)</div><div class="sch-hc">예상매출 (₩)</div>
+      <div class="sch-hc">메모</div><div class="sch-hc" style="text-align:center">관리</div>
+    </div>
+    <div id="schedule-body"></div>
+  </div>
+  </div><!-- /sec-body-04 -->
+</section>
+
+<!-- NOTES -->
+<section class="card fu">
+  <div class="sec-hdr"><span class="sec-num">05</span><div class="sec-ttl">운영 메모 — Notes</div></div>
+  <div style="padding:12px 18px"><textarea class="inp" id="ops-notes" placeholder="대표님 보고 사항, 현장 이슈, 특이사항 등..."></textarea></div>
+</section>
+
+</div><!-- /panel-ops -->
+
+<!-- ══ 탭 B: 매출 통계 ══ -->
+<div id="panel-stats" class="tab-panel">
+
+  <!-- 상단 KPI 요약 (통계탭 전용) -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:4px">
+    <div class="kpi-card"><div class="kpi-lbl">총 투입 비용</div><div id="s-cost" class="kpi-val">₩0</div><div class="kpi-sub">Total Investment</div></div>
+    <div class="kpi-card" style="border-color:rgba(100,149,237,.3)"><div class="kpi-lbl" style="color:#93c5fd">🇰🇷 한국 귀속 매출</div><div id="s-rev-kr" class="kpi-val" style="color:#93c5fd">₩0</div><div class="kpi-sub">Korea Revenue</div></div>
+    <div class="kpi-card" style="border-color:rgba(134,239,172,.25)"><div class="kpi-lbl" style="color:#86efac">🇯🇵 일본 귀속 매출</div><div id="s-rev-jp" class="kpi-val" style="color:#86efac">₩0</div><div class="kpi-sub">Japan Revenue</div></div>
+    <div class="kpi-card"><div class="kpi-lbl">순이익 (한국 기준)</div><div id="s-profit" class="kpi-val">₩0</div><div class="kpi-sub">Net Profit (KR)</div></div>
+  </div>
+
+  <!-- 매출 상세 (03번 섹션 이동) -->
+  <div class="card fu">
+    <div class="sec-hdr" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="sec-num">A</span>
+        <div><div class="sec-ttl">매출 상세 — Revenue Detail</div><div class="sec-sub">스케줄러 자동 연동 · 환자별 수가·케이스별 한국/일본 귀속 매출</div></div>
+      </div>
+      <span class="disc10-badge">🎫 당일 예약금 10% 결제 시 10% 할인</span>
+    </div>
+    <!-- 환자 추가 툴바 (통계탭용 - 운영탭 공유 데이터) -->
+    <div style="padding:10px 18px;background:rgba(201,168,76,.03);border-bottom:1px solid rgba(201,168,76,.1);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:10px;font-weight:700;color:var(--g400);letter-spacing:.1em;text-transform:uppercase">환자 직접 추가</span>
+      <div style="display:flex;align-items:flex-end;gap:6px;flex-wrap:wrap">
+        <div><label class="lbl" style="margin-bottom:2px">환자명</label><input type="text" id="np2-name" class="inp" placeholder="환자명" style="width:100px;font-size:11px"></div>
+        <div><label class="lbl" style="margin-bottom:2px">수량</label><input type="number" id="np2-qty" class="inp" value="6" min="1" style="width:60px;font-size:11px"></div>
+        <div><label class="lbl" style="margin-bottom:2px">수가 구분</label>
+          <select id="np2-pricetype" class="inp" style="width:120px;font-size:11px" onchange="onNp2PriceChange()">
+            <option value="custom">직접입력</option>
+            <option value="norm">정가</option>
+            <option value="rnose">리뷰(코밑)</option>
+            <option value="rface">리뷰(얼굴)</option>
+            <option value="qty">갯수할인</option>
+          </select>
+        </div>
+        <div><label class="lbl" style="margin-bottom:2px">단가(₩/개)</label><input type="number" id="np2-unit" class="inp" value="0" style="width:110px;font-size:11px"></div>
+        <div><label class="lbl" style="margin-bottom:2px">케이스</label>
+          <select id="np2-case" class="inp" style="width:160px;font-size:11px">
+            <option value="B">케이스 B — 한국 전체 (100%)</option>
+            <option value="A">케이스 A — 한국상담+일본세팅 (50%)</option>
+          </select>
+        </div>
+        <div><label class="lbl" style="margin-bottom:2px">예약금 10%↓</label>
+          <div class="dep-toggle" style="height:30px">
+            <button id="np2-dep-off" class="dt-off active-off" onclick="setNp2Dep(0)">미결제</button>
+            <button id="np2-dep-on"  class="dt-on"             onclick="setNp2Dep(1)">🎫 결제→10%↓</button>
+          </div>
+          <input type="hidden" id="np2-dep" value="0">
+        </div>
+        <button class="btn-gold" onclick="addPatient2()" style="height:30px;padding:0 14px">+ 추가</button>
+      </div>
+    </div>
+
+    <!-- 환자 목록 테이블 (공유) -->
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:900px">
+        <thead>
+          <tr style="background:rgba(201,168,76,.07);border-bottom:1px solid rgba(201,168,76,.22)">
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:center;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">#</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:left;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">환자명</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:center;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">수량</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:right;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">단가(₩)</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:left;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">수가구분</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:center;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">예약금 10%↓</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:right;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">결제금액(₩)</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:left;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">케이스</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:right;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">🇰🇷 한국 귀속</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:right;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">🇯🇵 일본 귀속</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:center;white-space:nowrap">삭제</th>
+          </tr>
+        </thead>
+        <tbody id="patient-tbody2"></tbody>
+        <tfoot>
+          <tr style="background:rgba(201,168,76,.08);border-top:2px solid rgba(201,168,76,.3)">
+            <td colspan="6" style="padding:8px 10px;font-size:11px;font-weight:700;color:var(--gold-light);text-align:right">합계</td>
+            <td id="s-total-pay" style="padding:8px 10px;font-size:13px;font-weight:700;color:var(--gold-light);text-align:right">₩0</td>
+            <td style="padding:8px 10px"></td>
+            <td id="s-total-kr"  style="padding:8px 10px;font-size:13px;font-weight:700;color:#93c5fd;text-align:right">₩0</td>
+            <td id="s-total-jp"  style="padding:8px 10px;font-size:13px;font-weight:700;color:#86efac;text-align:right">₩0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <!-- 요약 -->
+    <div style="padding:14px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-top:1px solid rgba(201,168,76,.12)">
+      <div class="res-box" style="padding:10px 14px"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g400);margin-bottom:4px">총 환자 수</div><div id="s-cnt" style="font-size:22px;font-weight:700;color:var(--gold-light)">0명</div></div>
+      <div class="res-box" style="padding:10px 14px"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g400);margin-bottom:4px">총 결제금액</div><div id="s-sum-pay" style="font-size:22px;font-weight:700;color:var(--gold-light)">₩0</div></div>
+      <div class="res-box" style="padding:10px 14px;border-color:rgba(100,149,237,.3);background:rgba(100,149,237,.05)"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#93c5fd;margin-bottom:4px">🇰🇷 한국 귀속 매출</div><div id="s-sum-kr" style="font-size:22px;font-weight:700;color:#93c5fd">₩0</div></div>
+      <div class="res-box" style="padding:10px 14px;border-color:rgba(134,239,172,.25);background:rgba(134,239,172,.04)"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#86efac;margin-bottom:4px">🇯🇵 일본 귀속 매출</div><div id="s-sum-jp" style="font-size:22px;font-weight:700;color:#86efac">₩0</div></div>
+    </div>
+  </div>
+
+  <!-- 비용 구조 (통계탭 전용) -->
+  <div class="card fu">
+    <div class="sec-hdr" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="sec-num">C</span>
+        <div><div class="sec-ttl">비용 구조 — Cost Structure</div><div class="sec-sub">운영 고정비 및 인건비 입력 → 손익 자동 계산</div></div>
+      </div>
+      <button class="toggle-btn" id="tog-cost" onclick="toggleSecCost()" title="숨기기/펼치기">▾</button>
+    </div>
+    <div id="body-cost" class="sec-body" style="max-height:2000px">
+    <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:22px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)">고정 운영비</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label class="lbl">임차료 (¥)</label><input type="number" id="c-rent-jpy" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+          <div><label class="lbl">환율 (₩/¥100)</label><input type="number" id="c-rate" class="inp" value="950" oninput="calcAll()"></div>
+          <div><label class="lbl">임차료 (₩)</label><input type="number" id="c-rent-krw" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+          <div><label class="lbl">마케팅비 (₩)</label><input type="number" id="c-mkt" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+          <div><label class="lbl">기타 운영비 (₩)</label><input type="number" id="c-misc" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+          <div><label class="lbl">항공/교통비 (₩)</label><input type="number" id="c-travel" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+        </div>
+        <div class="gdiv"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase">고정 운영비 소계</span>
+          <span id="fixed-sub" style="color:var(--white);font-size:14px;font-weight:700">₩0</span>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)">인건비 상세</div>
+          <button class="btn-gold" onclick="addStaff()" style="padding:3px 9px;font-size:10px">+ 인원 추가</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 90px 58px 52px 58px 78px 22px;gap:4px;align-items:center;padding-bottom:3px;margin-bottom:2px;border-bottom:1px solid rgba(201,168,76,.18)">
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase">직종/성명</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:center">시급/일당</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:center">단위</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:center">인원</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:center">시간</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:right">소계</div>
+          <div></div>
+        </div>
+        <div id="staff-list"></div>
+        <div class="gdiv"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase">인건비 소계</span>
+          <span id="staff-sub" style="color:var(--white);font-size:14px;font-weight:700">₩0</span>
+        </div>
+      </div>
+    </div>
+    </div><!-- /body-cost -->
+  </div>
+
+  <!-- 차트 섹션 -->
+  <div class="card fu">
+    <div class="sec-hdr">
+      <span class="sec-num">B</span>
+      <div><div class="sec-ttl">매출 분석 차트 — Revenue Analytics</div><div class="sec-sub">케이스별 · 수가별 · 할인별 매출 분포</div></div>
+    </div>
+    <div style="padding:18px 22px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+      <!-- 좌: 케이스별 바 차트 -->
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)">케이스별 매출 분포</div>
+        <div id="chart-case" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+
+      <!-- 우: 수가별 바 차트 -->
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)">수가 구분별 환자 수 / 매출</div>
+        <div id="chart-ptype" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+
+    <!-- 하단: 예약금 할인 현황 -->
+    <div style="padding:0 22px 18px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)">예약금 10% 할인 현황</div>
+        <div id="chart-dep" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)">손익 분석</div>
+        <div id="chart-profit" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-stats -->
+
+</main>
+
+<footer style="border-top:1px solid rgba(201,168,76,.1);padding:11px 22px;text-align:center;margin-top:6px">
+  <div style="font-size:10px;color:var(--g500);letter-spacing:.2em;text-transform:uppercase;font-weight:700">BLACKFILM — CONFIDENTIAL — Internal Operations Dashboard</div>
+</footer>
+
+<!-- MODAL -->
+<div id="slot-modal" class="modal-ov" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" style="width:640px">
+    <div style="padding:13px 17px;border-bottom:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold)">예약 등록 / 수정</div>
+        <div id="modal-lbl" style="font-size:10px;color:var(--g400);margin-top:1px"></div>
+      </div>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--g400);font-size:20px;cursor:pointer;padding:0 6px;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px 17px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label class="lbl">환자명</label><input type="text" id="m-name" class="inp" placeholder="환자명 입력"></div>
+        <div><label class="lbl">예약 상태</label>
+          <select id="m-status" class="inp">
+            <option value="확정">✅ 확정</option><option value="대기">⏳ 대기</option>
+            <option value="문의">💬 문의</option><option value="취소">❌ 취소</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">시술 항목</label>
+          <div style="display:flex;gap:5px">
+            <select id="m-proc-type" class="inp" style="width:180px;font-size:11px" onchange="onProcTypeChange()">
+              <option value="">— 선택 —</option>
+              <option value="블랙필름(베니어)">블랙필름 (베니어)</option>
+              <option value="블랙필름(크라운)">블랙필름 (크라운)</option>
+              <option value="custom">직접입력</option>
+            </select>
+            <input type="text" id="m-proc" class="inp" placeholder="직접 입력 또는 선택" style="flex:1;font-size:11px">
+          </div>
+        </div>
+        <div><label class="lbl">케이스 유형</label>
+          <select id="m-case" class="inp">
+            <option value="B">케이스 B — 한국 전체 (100%)</option>
+            <option value="A">케이스 A — 한국 상담 / 일본 세팅 (50%)</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">수가 구분</label>
+          <select id="m-pricetype" class="inp" onchange="onModalPriceTypeChange()">
+            <option value="custom">직접입력</option>
+            <option value="norm">정가</option>
+            <option value="rnose">리뷰할인(코밑)</option>
+            <option value="rface">리뷰할인(얼굴)</option>
+            <option value="qty">갯수할인</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">단가 (₩/개) <span id="m-unit-badge" style="font-size:9px;color:var(--g500);font-weight:400;letter-spacing:0">— 수가표에서 클릭하거나 직접 입력</span></label>
+          <input type="number" id="m-unit" class="inp" placeholder="0" value="0" oninput="onModalUnitInput();calcModalPreview()">
+        </div>
+      </div>
+      <!-- 수가표 팝업 -->
+      <div id="modal-price-popup" class="price-popup" style="display:none">
+        <div style="padding:8px 12px;background:rgba(201,168,76,.06);border-bottom:1px solid rgba(201,168,76,.15);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase">수가표 — 행 클릭 시 단가·수량 자동 입력</span>
+          <button onclick="closeModalPricePopup()" style="background:none;border:none;color:var(--g400);cursor:pointer;font-size:16px;line-height:1;padding:0 4px">×</button>
+        </div>
+        <div class="price-popup-tabs">
+          <button class="price-popup-tab active" onclick="switchModalPTab('norm',this)">정가</button>
+          <button class="price-popup-tab" onclick="switchModalPTab('rnose',this)">리뷰(코밑)</button>
+          <button class="price-popup-tab" onclick="switchModalPTab('rface',this)">리뷰(얼굴)</button>
+          <button class="price-popup-tab" onclick="switchModalPTab('qty',this)">갯수할인</button>
+        </div>
+        <div style="max-height:200px;overflow-y:auto">
+          <div class="ppanel active" id="mpanel-norm"></div>
+          <div class="ppanel" id="mpanel-rnose"></div>
+          <div class="ppanel" id="mpanel-rface"></div>
+          <div class="ppanel" id="mpanel-qty"></div>
+        </div>
+      </div>
+
+      <div style="padding:12px 14px;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.2);border-radius:2px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">블랙필름 수량</div>
+        <div class="stepper" style="justify-content:center">
+          <button class="step-btn" onclick="changeMQty(-1)" style="width:36px;height:36px;font-size:22px">−</button>
+          <span id="m-qty-d" class="step-val" style="font-size:28px;min-width:50px">0</span>
+          <button class="step-btn" onclick="changeMQty(1)" style="width:36px;height:36px;font-size:22px">+</button>
+        </div>
+        <input type="hidden" id="m-qty" value="0">
+        <div style="text-align:center;font-size:10px;color:var(--g500);margin-top:5px">개</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="lbl">예약금 결제 여부 <span class="disc10-badge" style="padding:1px 5px;font-size:9px">결제 시 → 10%↓ 자동 적용</span></label>
+          <div class="dep-toggle" style="height:34px">
+            <button id="m-dep-off" class="dt-off active-off" onclick="setMDep(0)" type="button">미결제</button>
+            <button id="m-dep-on"  class="dt-on"             onclick="setMDep(1)" type="button">🎫 결제 → 10%↓</button>
+          </div>
+          <input type="hidden" id="m-dep" value="0">
+        </div>
+        <div>
+          <label class="lbl">예상 매출 (₩) <span style="font-size:9px;color:var(--g500);font-weight:400;letter-spacing:0">— 단가×수량 기준 자동 계산 (직접 수정 가능)</span></label>
+          <input type="number" id="m-rev" class="inp" placeholder="0" value="0">
+        </div>
+      </div>
+      <div><label class="lbl">메모</label><input type="text" id="m-memo" class="inp" placeholder="특이사항, 요청사항 등"></div>
+    </div>
+    <div style="padding:10px 17px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:7px;justify-content:flex-end;align-items:center">
+      <button class="btn-del" id="m-del" onclick="deleteSlot()" style="margin-right:auto;display:none">삭제</button>
+      <button class="btn-out" onclick="closeModal()">취소</button>
+      <button class="btn-gold" onclick="saveSlot()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// 수가표 데이터
+// ══════════════════════════════════════════════
+const QTY = [20,18,16,14,12,10,8,6,4,2];
+const SUBS = ['norm','rnose','rface','qty'];
+const TYPE = {norm:'simple', rnose:'disc', rface:'disc', qty:'disc'};
+
+const tbl = {
+  norm:  {20:{u:2380000},18:{u:2380000},16:{u:2380000},14:{u:2380000},12:{u:2380000},10:{u:2380000},8:{u:2380000},6:{u:2380000},4:{u:2380000},2:{u:2380000}},
+  rnose: {20:{b:2380000,d:12},18:{b:2380000,d:12},16:{b:2380000,d:12},14:{b:2380000,d:8},12:{b:2380000,d:8},10:{b:2380000,d:8},8:{b:2380000,d:4},6:{b:2380000,d:4},4:{b:2380000,d:4},2:{b:2380000,d:0}},
+  rface: {20:{b:2380000,d:34},18:{b:2380000,d:34},16:{b:2380000,d:34},14:{b:2380000,d:30},12:{b:2380000,d:30},10:{b:2380000,d:30},8:{b:2380000,d:27},6:{b:2380000,d:27},4:{b:2380000,d:27},2:{b:2380000,d:0}},
+  qty:   {20:{b:2380000,d:20},18:{b:2380000,d:20},16:{b:2380000,d:20},14:{b:2380000,d:12},12:{b:2380000,d:12},10:{b:2380000,d:12},8:{b:2380000,d:8},6:{b:2380000,d:8},4:{b:2380000,d:8},2:{b:2380000,d:0}},
+};
+
+// discUnit 초기 계산
+['rnose','rface','qty'].forEach(s=>{
+  QTY.forEach(q=>{ const r=tbl[s][q]; r.du=Math.round(r.b*(1-r.d/100)); });
+});
+
+let curSub = 'norm';
+let isEdit  = false;
+
+// ── 서브탭 전환 ──────────────────────────────
+function switchSub(id){
+  if(isEdit){ if(!confirm('수정 중인 내용이 저장되지 않습니다. 이동할까요?')) return; cancelEdit(); }
+  SUBS.forEach(s=>{
+    document.getElementById('sp-'+s).style.display = s===id ? 'block':'none';
+    document.getElementById('st-'+s).classList.toggle('active', s===id);
+  });
+  curSub = id;
+}
+
+function toggleEdit(){
+  isEdit = true;
+  document.getElementById('edit-btn').style.display = 'none';
+  document.getElementById('save-btn').style.display = '';
+  renderCur();
+}
+function cancelEdit(){
+  isEdit = false;
+  document.getElementById('edit-btn').style.display = '';
+  document.getElementById('save-btn').style.display = 'none';
+}
+function saveCurrentTable(){
+  cancelEdit();
+  renderCur();
+  showToast();
+}
+function renderCur(){ renderTable(curSub); }
+
+// ── 테이블 렌더 ──────────────────────────────
+function getTotal(s, q){
+  if(TYPE[s]==='simple') return (tbl[s][q].u||0)*q;
+  return (tbl[s][q].du||0)*q;
+}
+function getUnit(s, q){
+  if(TYPE[s]==='simple') return tbl[s][q].u||0;
+  return tbl[s][q].du||0;
+}
+
+function renderTable(s){
+  const tbody = document.getElementById('tbody-'+s);
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  QTY.forEach(q=>{
+    const r = tbl[s][q]||{};
+    const total = getTotal(s,q);
+    const disc10 = Math.round(total*0.9);
+    const tr = document.createElement('tr');
+
+    if(TYPE[s]==='simple'){
+      const u = r.u||0;
+      if(isEdit && curSub===s){
+        tr.classList.add('em');
+        tr.innerHTML=`
+          <td>${q}개</td>
+          <td><input class="cell-inp" type="number" value="${u}" oninput="onU('${s}',${q},this.value)" style="width:100%"></td>
+          <td><input class="cell-inp ro" type="number" value="${u*q}" readonly style="width:100%"></td>
+          <td style="color:#fde68a;font-weight:700">₩${disc10.toLocaleString()}</td>`;
+      } else {
+        tr.innerHTML=`
+          <td>${q}개</td>
+          <td style="color:var(--white);font-weight:700">₩${u.toLocaleString()}</td>
+          <td style="color:var(--gold-light);font-weight:700;font-size:13px">₩${(u*q).toLocaleString()}</td>
+          <td style="color:#fde68a;font-weight:700">₩${disc10.toLocaleString()}</td>`;
+        tr.style.cursor='pointer';
+        tr.onclick=()=>{ document.querySelectorAll('.ptbl tr').forEach(r=>{r.classList.remove('sel');r.classList.remove('linked');}); tr.classList.add('sel'); tr.classList.add('linked'); showRB(s,q,u*q,disc10); };
+      }
+    } else {
+      const b=r.b||0, d=r.d||0, du=r.du||Math.round(b*(1-d/100));
+      if(isEdit && curSub===s){
+        tr.classList.add('em');
+        tr.innerHTML=`
+          <td>${q}개</td>
+          <td><input class="cell-inp" type="number" value="${b}" oninput="onB('${s}',${q},this.value)" style="width:100%"></td>
+          <td><input class="cell-inp dv" type="number" value="${d}" step="0.1" oninput="onD('${s}',${q},this.value)" style="width:100%;text-align:center"></td>
+          <td><input class="cell-inp dv" type="number" value="${du}" oninput="onDU('${s}',${q},this.value)" style="width:100%"></td>
+          <td><input class="cell-inp ro" type="number" value="${du*q}" readonly style="width:100%"></td>
+          <td style="color:#fde68a;font-weight:700">₩${disc10.toLocaleString()}</td>`;
+      } else {
+        tr.innerHTML=`
+          <td>${q}개</td>
+          <td style="color:var(--white);font-weight:700">₩${b.toLocaleString()}</td>
+          <td style="color:#86efac;font-weight:700">${d}%</td>
+          <td style="color:#86efac;font-weight:700">₩${du.toLocaleString()}</td>
+          <td style="color:var(--gold-light);font-weight:700;font-size:13px">₩${(du*q).toLocaleString()}</td>
+          <td style="color:#fde68a;font-weight:700">₩${disc10.toLocaleString()}</td>`;
+        tr.style.cursor='pointer';
+        tr.onclick=()=>{ document.querySelectorAll('.ptbl tr').forEach(r=>{r.classList.remove('sel');r.classList.remove('linked');}); tr.classList.add('sel'); tr.classList.add('linked'); showRB(s,q,du*q,disc10); };
+      }
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+// 현재 결과박스 상태 저장 (예약금 토글 시 재렌더링용)
+let _rbState = null;
+
+function showRB(s, q, total, disc10){
+  _rbState = {s, q, total, disc10};
+  _renderRB();
+  // 폼에 자동 입력
+  applyToSimForm(s, q, Math.round(total/q));
+}
+
+function _renderRB(){
+  if(!_rbState) return;
+  const {s, q, total, disc10} = _rbState;
+  const box = document.getElementById('rb-'+s);
+  if(!box) return;
+  const unit   = Math.round(total/q);
+  const saving = total - disc10;
+  const dep    = parseInt(document.getElementById('np-dep')?.value)||0;
+  const finalAmt = dep ? disc10 : total;
+
+  box.innerHTML=`
+    <div class="res-box" style="position:relative">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;align-items:center">
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g400);margin-bottom:4px">선택 갯수 · 단가</div>
+          <div style="font-size:24px;font-weight:700;color:var(--gold-light)">${q}개</div>
+          <div style="font-size:11px;color:var(--g400);margin-top:2px">₩${unit.toLocaleString()} / 개</div>
+        </div>
+        <div style="text-align:center;padding:0 8px;border-left:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.08)">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g400);margin-bottom:4px">정가 합계</div>
+          <div style="font-size:20px;font-weight:700;color:var(--white)">₩${total.toLocaleString()}</div>
+        </div>
+        <div style="text-align:center;padding:0 8px;border-right:1px solid rgba(255,255,255,.08)">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g400);margin-bottom:4px">🎫 예약금 10% 결제 시</div>
+          <div style="font-size:20px;font-weight:700;color:#fde68a">₩${disc10.toLocaleString()}</div>
+          <div style="font-size:10px;color:#86efac;margin-top:2px">-₩${saving.toLocaleString()}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g400);margin-bottom:4px">현재 선택 결제금액</div>
+          <div style="font-size:22px;font-weight:700;color:${dep?'#fde68a':'var(--gold-light)'}">₩${finalAmt.toLocaleString()}</div>
+          <div style="font-size:10px;color:${dep?'#fde68a':'var(--g500)'};margin-top:2px">${dep?'예약금 10% 결제 시 10% 할인 적용':'정가 적용 중'}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// 수가표 행 클릭 → 시뮬레이션 폼 자동 입력
+function applyToSimForm(s, q, unit){
+  const qEl  = document.getElementById('np-qty');
+  const uEl  = document.getElementById('np-unit');
+  const ptEl = document.getElementById('np-pricetype');
+  if(qEl)  qEl.value  = q;
+  if(uEl)  uEl.value  = unit;
+  if(ptEl) ptEl.value = s;
+
+  // 배지 표시
+  const badge = document.getElementById('np-selected-badge');
+  const btext = document.getElementById('np-badge-text');
+  if(badge && btext){
+    const subLabel = {norm:'정가', rnose:'리뷰할인(코밑)', rface:'리뷰할인(얼굴)', qty:'갯수할인'};
+    btext.textContent = `수가표에서 선택됨 → ${subLabel[s]||s} · ${q}개 · ₩${unit.toLocaleString()}/개`;
+    badge.classList.add('show');
+  }
+  updateNpPreview();
+
+  // 툴바 플래시
+  const toolbar = document.querySelector('#body-03 .np-selected-badge')?.closest('div[style*="background:rgba(201"]');
+  if(toolbar){ toolbar.classList.remove('flash-gold'); void toolbar.offsetWidth; toolbar.classList.add('flash-gold'); }
+}
+
+function clearTableSel(){
+  // 모든 수가표 선택 해제
+  ['norm','rnose','rface','qty'].forEach(s=>{
+    const tb = document.getElementById('tbody-'+s);
+    if(tb) tb.querySelectorAll('tr').forEach(r=>{r.classList.remove('sel'); r.classList.remove('linked');});
+  });
+  const badge = document.getElementById('np-selected-badge');
+  if(badge) badge.classList.remove('show');
+  _rbState = null;
+  ['rb-norm','rb-rnose','rb-rface','rb-qty'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML='';
+  });
+  document.getElementById('np-pricetype').value='custom';
+  updateNpPreview();
+}
+
+// ── 인라인 편집 핸들러 ────────────────────────
+function onU(s,q,v){ tbl[s][q].u=parseFloat(v)||0; syncROInput(s,q); }
+function onB(s,q,v){ tbl[s][q].b=parseFloat(v)||0; recalcDisc(s,q); }
+function onD(s,q,v){ tbl[s][q].d=Math.min(100,Math.max(0,parseFloat(v)||0)); recalcDisc(s,q); }
+function onDU(s,q,v){
+  const du=parseFloat(v)||0, b=tbl[s][q].b||0;
+  tbl[s][q].du=du;
+  tbl[s][q].d=b>0?Math.round((1-du/b)*1000)/10:0;
+  syncDiscInputs(s,q);
+}
+function recalcDisc(s,q){
+  const r=tbl[s][q]; r.du=Math.round((r.b||0)*(1-(r.d||0)/100));
+  syncDiscInputs(s,q);
+}
+function syncDiscInputs(s,q){
+  const tbody=document.getElementById('tbody-'+s);
+  if(!tbody) return;
+  const idx=QTY.indexOf(q); if(idx<0) return;
+  const row=tbody.querySelectorAll('tr')[idx]; if(!row) return;
+  const inps=row.querySelectorAll('input');
+  const r=tbl[s][q];
+  if(inps[1]) inps[1].value=r.d;
+  if(inps[2]) inps[2].value=r.du;
+  if(inps[3]) inps[3].value=(r.du||0)*q;
+}
+function syncROInput(s,q){
+  const tbody=document.getElementById('tbody-'+s);
+  if(!tbody) return;
+  const idx=QTY.indexOf(q); if(idx<0) return;
+  const row=tbody.querySelectorAll('tr')[idx]; if(!row) return;
+  const ro=row.querySelector('input[readonly]');
+  if(ro) ro.value=(tbl[s][q].u||0)*q;
+}
+
+// ── 탭 전환 (서브탭) ─────────────────────────
+function switchSub(id){
+  if(isEdit){ if(!confirm('수정 중인 내용이 저장되지 않습니다. 이동할까요?')) return; cancelEdit(); }
+  SUBS.forEach(s=>{
+    document.getElementById('sp-'+s).style.display = s===id?'block':'none';
+    document.getElementById('st-'+s).classList.toggle('active', s===id);
+  });
+  curSub = id;
+}
+
+// ══════════════════════════════════════════════
+// 매출 시뮬레이션
+// ══════════════════════════════════════════════
+function vn(id){ return parseFloat(document.getElementById(id)?.value)||0; }
+
+
+
+
+
+// ══════════════════════════════════════════════
+// 스케줄러
+// ══════════════════════════════════════════════
+const scheduleData={};
+let curSlot=null;
+const HOURS=[];
+for(let h=9;h<=18;h++) HOURS.push(String(h).padStart(2,'0'));
+
+function renderSchedule(){
+  const body=document.getElementById('schedule-body');
+  const mA=document.getElementById('mgr-a').value||'실장 A';
+  const mB=document.getElementById('mgr-b').value||'실장 B';
+  body.innerHTML='';
+  HOURS.forEach(h=>{
+    const time=h+':00';
+    ['A','B'].forEach((m,mi)=>{
+      const key=time+'-'+m;
+      const slot=scheduleData[key];
+      const isA=m==='A';
+      const mName=isA?mA:mB;
+      const row=document.createElement('div');
+      row.className='sch-row'+(mi===0?' hour-start':'')+(isA?'':' mgr-b')+(slot?' booked':'');
+      const sm={'확정':'sbadge sb-ok','대기':'sbadge sb-wt','문의':'sbadge sb-qi','취소':'sbadge sb-cx'};
+      const st={'확정':'✅ 확정','대기':'⏳ 대기','문의':'💬 문의','취소':'❌ 취소'};
+      const caseBadge = slot ? (slot.case==='A'
+        ? `<span style="margin-left:3px;font-size:9px;background:rgba(147,197,253,.14);color:#93c5fd;border:1px solid rgba(147,197,253,.28);padding:1px 4px;border-radius:2px;white-space:nowrap">A</span>`
+        : `<span style="margin-left:3px;font-size:9px;background:rgba(134,239,172,.12);color:#86efac;border:1px solid rgba(134,239,172,.26);padding:1px 4px;border-radius:2px;white-space:nowrap">B</span>`) : '';
+      const depBadge = slot&&slot.dep ? `<span style="font-size:9px;background:rgba(253,230,138,.12);color:#fde68a;border:1px solid rgba(253,230,138,.26);padding:1px 4px;border-radius:2px;white-space:nowrap">🎫10%↓</span>` : '';
+      row.innerHTML=`
+        <div class="sch-cell">${mi===0?`<span class="time-lbl">${time}</span>`:`<span style="font-size:9px;color:var(--g600)">└</span>`}</div>
+        <div class="sch-cell"><span class="${isA?'ba':'bb'}">${mName}</span></div>
+        <div class="sch-cell" style="flex-direction:column;align-items:flex-start;gap:2px">
+          ${slot?`<span style="font-size:12px;font-weight:700;color:var(--white)">${slot.name||'—'}</span>`
+                :`<span style="font-size:10px;color:var(--g600);cursor:pointer" onclick="openModal('${key}')">+ 등록</span>`}
+          ${slot?`<div style="display:flex;gap:3px;flex-wrap:wrap">${caseBadge}${depBadge}</div>`:''}
+        </div>
+        <div class="sch-cell">${slot?`<span class="${sm[slot.status]||'sbadge sb-ok'}">${st[slot.status]||slot.status}</span>`:''}</div>
+        <div class="sch-cell" style="flex-direction:column;align-items:flex-start;gap:2px">
+          <span style="font-size:11px;color:var(--g200)">${slot?(slot.proc||'—'):''}</span>
+          ${slot&&slot.unit>0?`<span style="font-size:10px;color:var(--g500)">₩${Number(slot.unit).toLocaleString()}/개 · ${PRICE_LABEL[slot.priceType]||''}</span>`:''}
+        </div>
+        <div class="sch-cell">${slot&&slot.qty>0?`<span style="font-size:13px;font-weight:700;color:var(--gold-light)">${slot.qty}개</span>`:''}</div>
+        <div class="sch-cell" style="flex-direction:column;align-items:flex-start;gap:1px">
+          ${slot&&slot.dep?`<span style="font-size:10px;font-weight:700;color:#fde68a">🎫결제</span>`:''}
+          ${slot&&slot.depAmt>0?`<span style="font-size:10px;color:#fde68a">₩${Number(slot.depAmt).toLocaleString()}</span>`:slot&&slot.dep?`<span style="font-size:9px;color:var(--g500)">금액별도</span>`:''}
+        </div>
+        <div class="sch-cell">${slot&&slot.rev>0?`<span style="font-size:12px;font-weight:700;color:var(--gold-light)">₩${Number(slot.rev).toLocaleString()}</span>`:''}</div>
+        <div class="sch-cell" style="overflow:hidden">
+          <span style="font-size:10px;color:var(--g400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;display:block" title="${slot?(slot.memo||''):''}">
+            ${slot&&slot.memo?slot.memo:''}
+          </span>
+        </div>
+        <div class="sch-cell" style="justify-content:center">
+          ${slot?`<button class="btn-sm" onclick="openModal('${key}',true)">수정</button>`
+                :`<button class="btn-sm" style="opacity:.35" onclick="openModal('${key}')">등록</button>`}
+        </div>`;
+      body.appendChild(row);
+    });
+  });
+  updateSch();
+}
+
+function updateSch(){
+  let cnt=0,films=0,dep=0,rev=0;
+  Object.values(scheduleData).forEach(s=>{
+    if(!s||s.status==='취소') return;
+    if(s.name) cnt++;
+    films+=Number(s.qty)||0;
+    // dep가 boolean(0/1)이 아닌 금액(depAmt)으로 합산
+    dep+=Number(s.depAmt)||0;
+    rev+=Number(s.rev)||0;
+  });
+  document.getElementById('sch-count').textContent=cnt+'명';
+  document.getElementById('sch-films').textContent=films+'개';
+  document.getElementById('sch-deposit').textContent='₩'+dep.toLocaleString();
+  document.getElementById('sch-rev').textContent='₩'+rev.toLocaleString();
+  calcAll();
+}
+
+function changeMQty(d){
+  let q=parseInt(document.getElementById('m-qty').value)||0;
+  q=Math.max(0,q+d);
+  document.getElementById('m-qty').value=q;
+  document.getElementById('m-qty-d').textContent=q;
+  // 수가 구분이 선택된 경우 단가 자동 재조회
+  const pt=document.getElementById('m-pricetype')?.value||'custom';
+  if(pt!=='custom'){
+    const u=getUnitFromTable(pt,q);
+    if(u!==null) document.getElementById('m-unit').value=u;
+  }
+  calcModalPreview();
+}
+function openModal(key,isEdit=false){
+  curSlot=key;
+  const [time,m]=key.split('-');
+  const mName=m==='A'?(document.getElementById('mgr-a').value||'실장 A'):(document.getElementById('mgr-b').value||'실장 B');
+  document.getElementById('modal-lbl').textContent=time+' — '+mName+' 담당';
+  const s=scheduleData[key]||{};
+  document.getElementById('m-name').value=s.name||'';
+  document.getElementById('m-status').value=s.status||'확정';
+  document.getElementById('m-proc').value=s.proc||'';
+  // 시술항목 select 초기화
+  const procTypeEl=document.getElementById('m-proc-type');
+  if(procTypeEl){
+    const procVal=s.proc||'';
+    if(procVal==='블랙필름(베니어)'||procVal==='블랙필름(크라운)') procTypeEl.value=procVal;
+    else if(procVal) procTypeEl.value='custom';
+    else procTypeEl.value='';
+  }
+  document.getElementById('m-case').value=s.case||'B';
+  document.getElementById('m-qty').value=s.qty||0;
+  document.getElementById('m-qty-d').textContent=s.qty||0;
+  // 수가 구분 / 단가
+  const mPt=document.getElementById('m-pricetype');
+  const mUn=document.getElementById('m-unit');
+  if(mPt) mPt.value=s.priceType||'custom';
+  if(mUn) mUn.value=s.unit||0;
+  // 예약금 토글
+  const depVal=s.dep||0;
+  document.getElementById('m-dep').value=depVal;
+  setMDep(depVal, true); // silent=true
+  document.getElementById('m-rev').value=s.rev||0;
+  document.getElementById('m-memo').value=s.memo||'';
+  document.getElementById('m-del').style.display=isEdit?'block':'none';
+  closeModalPricePopup(); // 팝업 초기화
+  calcModalPreview();
+  document.getElementById('slot-modal').classList.add('active');
+}
+function closeModal(){ document.getElementById('slot-modal').classList.remove('active'); curSlot=null; }
+function saveSlot(){
+  if(!curSlot) return;
+  const qty  = parseInt(document.getElementById('m-qty').value)||0;
+  const dep  = parseInt(document.getElementById('m-dep').value)||0;
+  const unit = parseFloat(document.getElementById('m-unit')?.value)||0;
+  const pt   = document.getElementById('m-pricetype')?.value||'custom';
+  const caseType = document.getElementById('m-case').value||'B';
+  // 예상 매출 자동 계산 (rev 입력 없으면 단가×수량 기준)
+  let rev = parseFloat(document.getElementById('m-rev').value)||0;
+  if(rev===0 && unit>0 && qty>0){
+    rev = dep ? Math.round(unit*qty*0.9) : unit*qty;
+  }
+  // depAmt: 예약금 실제 금액 (rev의 10% 또는 unit*qty*0.9 기준)
+  const depAmt = dep && rev>0 ? rev : 0;
+  scheduleData[curSlot]={
+    name:document.getElementById('m-name').value,
+    status:document.getElementById('m-status').value,
+    proc:document.getElementById('m-proc').value,
+    case:caseType,
+    qty, dep, depAmt, unit, priceType:pt, rev,
+    memo:document.getElementById('m-memo').value,
+    fromSch:true,
+    slotKey:curSlot,
+  };
+  closeModal();
+  renderSchedule();
+  syncSchToPatients(); // 스케줄러 → 매출상세 동기화
+}
+function deleteSlot(){
+  if(!curSlot) return;
+  delete scheduleData[curSlot];
+  closeModal();
+  renderSchedule();
+  syncSchToPatients();
+}
+
+// 스케줄러 데이터 → 매출 상세 patients 자동 동기화
+function syncSchToPatients(){
+  // 스케줄러에서 온 항목들 제거 후 재삽입
+  patients = patients.filter(p=>!p.fromSch);
+
+  Object.values(scheduleData).forEach(s=>{
+    if(!s || s.status==='취소' || !s.name) return;
+    // 케이스 매핑: 스케줄러 case → 매출상세 caseType
+    // 'A'(한국상담+일본세팅=50%), 'B'(한국전체=100%)
+    const caseType = s.case==='A' ? 'A' : 'B';
+    const dep = (s.dep && Number(s.dep)>0) ? 1 : 0;
+    const qty = Number(s.qty)||0;
+    const unit = Number(s.unit)||0;
+    // 단가가 없으면 rev에서 역산
+    const effectiveUnit = unit>0 ? unit : (qty>0 ? Math.round((Number(s.rev)||0)/qty) : 0);
+    patientIdCnt++;
+    patients.push({
+      id: patientIdCnt,
+      name: s.name + ' [스케줄]',
+      qty,
+      unit: effectiveUnit,
+      priceType: s.priceType||'custom',
+      dep,
+      caseType,
+      fromSch: true,
+      slotKey: s.slotKey,
+    });
+  });
+  renderPatients();
+  calcAll();
+}
+
+// ══════════════════════════════════════════════
+// 인건비
+// ══════════════════════════════════════════════
+let staffCnt=0;
+const staffData={};
+
+function addStaff(role='',rate=0,unit='일당',count=1,hours=8){
+  staffCnt++;
+  const id=staffCnt;
+  staffData[id]={role,rate,unit,count,hours};
+  const list=document.getElementById('staff-list');
+  const div=document.createElement('div');
+  div.style.cssText='display:grid;grid-template-columns:1fr 90px 58px 52px 58px 78px 22px;gap:4px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)';
+  div.id='sr-'+id;
+  div.innerHTML=`
+    <input type="text" class="inp" placeholder="직종/성명" value="${role}" oninput="staffData[${id}].role=this.value" style="font-size:11px;padding:5px 7px">
+    <input type="number" class="inp" placeholder="0" value="${rate}" oninput="staffData[${id}].rate=Number(this.value);calcAll()" style="font-size:11px;padding:5px 7px;text-align:right">
+    <select class="inp" oninput="staffData[${id}].unit=this.value;calcAll();toggleH(${id})" style="font-size:11px;padding:5px 4px">
+      <option ${unit==='시급'?'selected':''}>시급</option>
+      <option ${unit==='일당'?'selected':''}>일당</option>
+    </select>
+    <input type="number" class="inp" placeholder="1" value="${count}" min="1" oninput="staffData[${id}].count=Number(this.value);calcAll()" style="font-size:11px;padding:5px 7px;text-align:center">
+    <input type="number" class="inp" id="h-${id}" placeholder="8" value="${hours}" min="1" max="24" oninput="staffData[${id}].hours=Number(this.value);calcAll()" style="font-size:11px;padding:5px 7px;text-align:center;${unit==='일당'?'opacity:.28;pointer-events:none':''}">
+    <div style="display:flex;align-items:center;justify-content:flex-end"><span id="ss-${id}" style="font-size:11px;font-weight:700;color:var(--gold-light)">₩0</span></div>
+    <button onclick="removeStaff(${id})" style="background:none;border:none;color:var(--g500);cursor:pointer;font-size:16px;padding:0;line-height:1">×</button>`;
+  list.appendChild(div);
+  calcAll();
+}
+function toggleH(id){
+  const d=staffData[id].unit==='일당';
+  const el=document.getElementById('h-'+id);
+  if(el){el.style.opacity=d?'.28':'1';el.style.pointerEvents=d?'none':'auto';}
+}
+function removeStaff(id){ delete staffData[id]; const el=document.getElementById('sr-'+id); if(el) el.remove(); calcAll(); }
+
+// ══════════════════════════════════════════════
+// 매출 시뮬레이션 — 환자별 목록 방식
+// ══════════════════════════════════════════════
+let patients = [];   // [{name, qty, unit, priceType, dep, caseType}]
+let patientIdCnt = 0;
+
+const PRICE_LABEL = {
+  custom:'직접입력', norm:'정가', rnose:'리뷰(코밑)', rface:'리뷰(얼굴)', qty:'갯수할인'
+};
+const CASE_LABEL = {
+  A:'케이스 A (50%)', B:'케이스 B (100%)'
+};
+
+// 수가표에서 갯수에 맞는 단가 자동 조회
+function getUnitFromTable(priceType, qty){
+  if(priceType==='custom') return null;
+  if(priceType==='norm'){
+    // 정가: 가장 가까운 갯수 행 단가
+    const r = tbl.norm[qty] || tbl.norm[2];
+    return r ? r.u : 0;
+  }
+  const t = tbl[priceType];
+  if(!t) return null;
+  // 가장 가까운 갯수 찾기
+  const closest = [20,18,16,14,12,10,8,6,4,2].reduce((a,b)=>
+    Math.abs(b-qty)<Math.abs(a-qty)?b:a);
+  const r = t[closest];
+  return r ? (r.du||r.u||0) : 0;
+}
+
+function onPriceTypeChange(){
+  const pt  = document.getElementById('np-pricetype').value;
+  const qty = parseInt(document.getElementById('np-qty').value)||6;
+  if(pt!=='custom'){
+    const u = getUnitFromTable(pt, qty);
+    if(u!==null) document.getElementById('np-unit').value = u;
+  }
+  updateNpPreview();
+}
+
+function onNpQtyChange(){
+  // 수가 구분이 custom이 아닐 경우 수가표에서 단가 재조회
+  const pt  = document.getElementById('np-pricetype').value;
+  const qty = parseInt(document.getElementById('np-qty').value)||6;
+  if(pt!=='custom'){
+    const u = getUnitFromTable(pt, qty);
+    if(u!==null) document.getElementById('np-unit').value = u;
+  }
+  updateNpPreview();
+}
+
+function onNpUnitChange(){
+  // 단가를 직접 수정하면 수가 구분을 직접입력으로 전환
+  document.getElementById('np-pricetype').value = 'custom';
+  updateNpPreview();
+}
+
+// ══════════════════════════════════════════════
+// 스케줄러 모달 수가표 팝업
+// ══════════════════════════════════════════════
+const MODAL_PT_LABEL = {norm:'정가',rnose:'리뷰할인(코밑)',rface:'리뷰할인(얼굴)',qty:'갯수할인',custom:'직접입력'};
+
+function buildModalPricePanels(){
+  const panels = {norm:'mpanel-norm',rnose:'mpanel-rnose',rface:'mpanel-rface',qty:'mpanel-qty'};
+  Object.entries(panels).forEach(([s, panelId])=>{
+    const panel = document.getElementById(panelId);
+    if(!panel) return;
+    const isSimple = TYPE[s]==='simple';
+    let html = `<table class="ptbl-sm"><thead><tr>
+      <th style="text-align:center">갯수</th>
+      ${isSimple ? '<th>단가(₩)</th><th>합계(₩)</th><th>10%↓(₩)</th>'
+                 : '<th>할인율</th><th>할인단가(₩)</th><th>합계(₩)</th><th>10%↓(₩)</th>'}
+    </tr></thead><tbody>`;
+    QTY.forEach(q=>{
+      const r   = tbl[s][q]||{};
+      const unit  = isSimple ? (r.u||0) : (r.du||0);
+      const total = unit*q;
+      const d10   = Math.round(total*0.9);
+      if(isSimple){
+        html += `<tr onclick="applyModalPrice('${s}',${q},${unit})" title="클릭하여 선택">
+          <td>${q}개</td>
+          <td>₩${unit.toLocaleString()}</td>
+          <td style="color:var(--gold-light);font-weight:700">₩${total.toLocaleString()}</td>
+          <td style="color:#fde68a">₩${d10.toLocaleString()}</td>
+        </tr>`;
+      } else {
+        const d = r.d||0;
+        html += `<tr onclick="applyModalPrice('${s}',${q},${unit})" title="클릭하여 선택">
+          <td>${q}개</td>
+          <td style="color:#86efac">${d}%</td>
+          <td style="color:#86efac">₩${unit.toLocaleString()}</td>
+          <td style="color:var(--gold-light);font-weight:700">₩${total.toLocaleString()}</td>
+          <td style="color:#fde68a">₩${d10.toLocaleString()}</td>
+        </tr>`;
+      }
+    });
+    html += '</tbody></table>';
+    panel.innerHTML = html;
+  });
+}
+
+function openModalPricePopup(){
+  buildModalPricePanels();
+  const popup = document.getElementById('modal-price-popup');
+  if(popup) popup.style.display='block';
+}
+function closeModalPricePopup(){
+  const popup = document.getElementById('modal-price-popup');
+  if(popup) popup.style.display='none';
+}
+
+function switchModalPTab(s, btn){
+  // 탭 버튼 활성화
+  document.querySelectorAll('.price-popup-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // 패널 전환
+  ['norm','rnose','rface','qty'].forEach(id=>{
+    const el=document.getElementById('mpanel-'+id);
+    if(el) el.classList.toggle('active', id===s);
+  });
+  // 현재 수가 구분 select도 변경
+  const ptEl = document.getElementById('m-pricetype');
+  if(ptEl) ptEl.value = s;
+}
+
+function applyModalPrice(s, q, unit){
+  // 수량 설정
+  document.getElementById('m-qty').value = q;
+  document.getElementById('m-qty-d').textContent = q;
+  // 단가 설정
+  document.getElementById('m-unit').value = unit;
+  // 수가 구분 설정
+  const ptEl = document.getElementById('m-pricetype');
+  if(ptEl) ptEl.value = s;
+  // 선택된 행 하이라이트
+  document.querySelectorAll('.ptbl-sm tr').forEach(r=>r.classList.remove('psel'));
+  event.currentTarget.classList.add('psel');
+  // 예상 매출 자동 계산
+  calcModalPreview();
+  // 팝업 닫기
+  closeModalPricePopup();
+}
+
+function onModalPriceTypeChange(){
+  const pt = document.getElementById('m-pricetype').value;
+  if(pt==='custom'){
+    closeModalPricePopup();
+  } else {
+    openModalPricePopup();
+    // 해당 탭으로 자동 이동
+    const tabBtns = document.querySelectorAll('.price-popup-tab');
+    const idx = ['norm','rnose','rface','qty'].indexOf(pt);
+    if(idx>=0 && tabBtns[idx]) switchModalPTab(pt, tabBtns[idx]);
+    // 현재 수량에 맞는 단가 자동 세팅
+    const qty = parseInt(document.getElementById('m-qty').value)||6;
+    const u = getUnitFromTable(pt, qty);
+    if(u!==null) document.getElementById('m-unit').value=u;
+    calcModalPreview();
+  }
+}
+
+function onModalUnitInput(){
+  const ptEl = document.getElementById('m-pricetype');
+  if(ptEl) ptEl.value='custom';
+  closeModalPricePopup();
+}
+
+function calcModalPreview(){
+  const qty  = parseInt(document.getElementById('m-qty')?.value)||0;
+  const unit = parseFloat(document.getElementById('m-unit')?.value)||0;
+  const dep  = parseInt(document.getElementById('m-dep')?.value)||0;
+  const base = qty*unit;
+  const rev  = dep ? Math.round(base*0.9) : base;
+  const revEl = document.getElementById('m-rev');
+  if(revEl && base>0) revEl.value = rev;
+}
+
+function onProcTypeChange(){
+  const sel = document.getElementById('m-proc-type').value;
+  const inp = document.getElementById('m-proc');
+  if(sel && sel !== 'custom'){
+    inp.value = sel;
+    inp.style.opacity = '0.5';
+    inp.readOnly = true;
+  } else {
+    inp.value = sel === 'custom' ? '' : '';
+    inp.style.opacity = '1';
+    inp.readOnly = false;
+    inp.focus();
+  }
+}
+
+function setMDep(v, silent){
+  document.getElementById('m-dep').value=v;
+  const offBtn=document.getElementById('m-dep-off');
+  const onBtn =document.getElementById('m-dep-on');
+  if(offBtn) offBtn.className= v===0 ? 'dt-off active-off':'dt-off';
+  if(onBtn)  onBtn.className = v===1 ? 'dt-on  active-on' :'dt-on';
+  if(!silent) calcModalPreview();
+}
+
+function setDep(v){
+  document.getElementById('np-dep').value = v;
+  // 토글 버튼 스타일
+  document.getElementById('dep-off-btn').className = v===0 ? 'dt-off active-off' : 'dt-off';
+  document.getElementById('dep-on-btn').className  = v===1 ? 'dt-on  active-on'  : 'dt-on';
+  // 결과박스 즉시 갱신
+  _renderRB();
+  updateNpPreview();
+}
+
+function updateNpPreview(){
+  const qty  = parseInt(document.getElementById('np-qty')?.value)||0;
+  const unit = parseFloat(document.getElementById('np-unit')?.value)||0;
+  const dep  = parseInt(document.getElementById('np-dep')?.value)||0;
+  const base = qty * unit;
+  const final = dep ? Math.round(base*0.9) : base;
+  const el = document.getElementById('np-preview');
+  if(el){
+    el.textContent = '₩'+final.toLocaleString();
+    el.style.color = dep ? '#fde68a' : 'var(--gold-light)';
+  }
+}
+
+function addPatient(){
+  const name  = document.getElementById('np-name').value.trim()||('환자'+(patientIdCnt+1));
+  const qty   = Math.max(1, parseInt(document.getElementById('np-qty').value)||6);
+  const pt    = document.getElementById('np-pricetype').value;
+  let   unit  = parseFloat(document.getElementById('np-unit').value)||0;
+  // 수가표 연동 시 단가 자동 갱신
+  if(pt!=='custom'){ const u=getUnitFromTable(pt,qty); if(u!==null) unit=u; }
+  const dep       = parseInt(document.getElementById('np-dep').value)||0;
+  const caseType  = document.getElementById('np-case').value;
+  patientIdCnt++;
+  patients.push({id:patientIdCnt, name, qty, unit, priceType:pt, dep, caseType});
+  document.getElementById('np-name').value='';
+  renderPatients();
+  calcAll();
+}
+
+function removePatient(id){
+  patients = patients.filter(p=>p.id!==id);
+  renderPatients();
+  calcAll();
+}
+
+function renderPatients(){
+  const tbody = document.getElementById('patient-tbody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+
+  let totalPay=0, totalKR=0, totalJP=0;
+
+  patients.forEach((p,idx)=>{
+    const baseAmt  = p.qty * p.unit;
+    const payAmt   = p.dep ? Math.round(baseAmt*0.9) : baseAmt;
+    // 케이스A: 한국상담+일본세팅 → 한국 50%, 일본 50%
+    // 케이스B: 한국 전체          → 한국 100%, 일본 0%
+    const krAmt = p.caseType==='A' ? Math.round(payAmt*0.5) : payAmt;
+    const jpAmt = p.caseType==='A' ? Math.round(payAmt*0.5) : 0;
+
+    totalPay += payAmt;
+    totalKR  += krAmt;
+    totalJP  += jpAmt;
+
+    const tr = document.createElement('tr');
+    tr.style.borderBottom='1px solid rgba(255,255,255,.04)';
+    tr.onmouseenter=()=>tr.style.background='rgba(201,168,76,.04)';
+    tr.onmouseleave=()=>tr.style.background='';
+    const caseColor = p.caseType==='A' ? '#93c5fd':'#86efac';
+    tr.innerHTML=`
+      <td style="padding:6px 10px;text-align:center;color:var(--g500);font-size:11px;border-right:1px solid rgba(255,255,255,.04)">${idx+1}</td>
+      <td style="padding:6px 10px;font-weight:700;color:var(--white);text-align:left;border-right:1px solid rgba(255,255,255,.04)">${p.name}</td>
+      <td style="padding:6px 10px;text-align:center;color:var(--gold-light);font-weight:700;border-right:1px solid rgba(255,255,255,.04)">${p.qty}개</td>
+      <td style="padding:6px 10px;text-align:right;color:var(--g200);border-right:1px solid rgba(255,255,255,.04)">₩${p.unit.toLocaleString()}</td>
+      <td style="padding:6px 10px;text-align:left;border-right:1px solid rgba(255,255,255,.04)"><span style="font-size:10px;background:rgba(201,168,76,.1);color:var(--gold-light);border:1px solid rgba(201,168,76,.25);padding:1px 6px;border-radius:2px">${PRICE_LABEL[p.priceType]||'직접입력'}</span></td>
+      <td style="padding:6px 10px;text-align:center;border-right:1px solid rgba(255,255,255,.04)">${p.dep?'<span style="font-size:10px;background:rgba(253,230,138,.12);color:#fde68a;border:1px solid rgba(253,230,138,.28);padding:1px 6px;border-radius:2px">10%↓ 적용</span>':'<span style="font-size:10px;color:var(--g500)">—</span>'}</td>
+      <td style="padding:6px 10px;text-align:right;font-weight:700;color:var(--white);border-right:1px solid rgba(255,255,255,.04)">₩${payAmt.toLocaleString()}</td>
+      <td style="padding:6px 10px;text-align:left;border-right:1px solid rgba(255,255,255,.04)"><span style="font-size:10px;background:rgba(0,0,0,.2);color:${caseColor};border:1px solid ${caseColor}44;padding:1px 6px;border-radius:2px">${CASE_LABEL[p.caseType]}</span></td>
+      <td style="padding:6px 10px;text-align:right;font-weight:700;color:#93c5fd;border-right:1px solid rgba(255,255,255,.04)">₩${krAmt.toLocaleString()}</td>
+      <td style="padding:6px 10px;text-align:right;font-weight:700;color:#86efac;border-right:1px solid rgba(255,255,255,.04)">₩${jpAmt.toLocaleString()}</td>
+      <td style="padding:6px 10px;text-align:center"><button onclick="removePatient(${p.id})" style="background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.28);color:#f87171;padding:2px 8px;font-size:10px;cursor:pointer;border-radius:2px;font-family:'Malgun Gothic',sans-serif;font-weight:700">삭제</button></td>`;
+    tbody.appendChild(tr);
+  });
+
+  // tfoot 업데이트
+  const tf = document.getElementById('sim-total-pay');
+  if(tf) tf.textContent='₩'+totalPay.toLocaleString();
+  const tk = document.getElementById('sim-total-kr');
+  if(tk) tk.textContent='₩'+totalKR.toLocaleString();
+  const tj = document.getElementById('sim-total-jp');
+  if(tj) tj.textContent='₩'+totalJP.toLocaleString();
+
+  // 요약
+  const cnt = patients.length;
+  ['sim-cnt','sim-sum-pay','sim-sum-kr','sim-sum-jp'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent = i===0 ? cnt+'명'
+      : i===1 ? '₩'+totalPay.toLocaleString()
+      : i===2 ? '₩'+totalKR.toLocaleString()
+      : '₩'+totalJP.toLocaleString();
+  });
+
+  // calcAll()이 patients에서 직접 계산하므로 전역값 저장 불필요
+  // 하지만 backward compat 유지
+  window._simRevKR   = totalKR;
+  window._simRevJP   = totalJP;
+  window._simRevTotal= totalPay;
+}
+
+// ══════════════════════════════════════════════
+// 메인 탭 전환
+// ══════════════════════════════════════════════
+function switchMainTab(tab){
+  ['ops','stats'].forEach(t=>{
+    document.getElementById('panel-'+t).classList.toggle('active', t===tab);
+    document.getElementById('mtab-'+t).classList.toggle('active', t===tab);
+  });
+  if(tab==='stats') renderStatTab();
+}
+
+// ══════════════════════════════════════════════
+// 통계탭 렌더링
+// ══════════════════════════════════════════════
+function renderStatTab(){
+  renderPatients2();
+  renderCharts();
+  // KPI는 calcAll()이 이미 업데이트해둠 → 재계산만
+  calcAll();
+}
+
+function renderPatients2(){
+  const tbody=document.getElementById('patient-tbody2');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  let totalPay=0,totalKR=0,totalJP=0;
+  patients.forEach((p,idx)=>{
+    const baseAmt=p.qty*p.unit;
+    const payAmt=p.dep?Math.round(baseAmt*0.9):baseAmt;
+    const krAmt=p.caseType==='A'?Math.round(payAmt*0.5):payAmt;
+    const jpAmt=p.caseType==='A'?Math.round(payAmt*0.5):0;
+    totalPay+=payAmt; totalKR+=krAmt; totalJP+=jpAmt;
+    const caseColor=p.caseType==='A'?'#93c5fd':'#86efac';
+    const tr=document.createElement('tr');
+    tr.style.borderBottom='1px solid rgba(255,255,255,.04)';
+    tr.onmouseenter=()=>tr.style.background='rgba(201,168,76,.04)';
+    tr.onmouseleave=()=>tr.style.background='';
+    tr.innerHTML=`
+      <td style="padding:5px 10px;text-align:center;color:var(--g500);font-size:11px;border-right:1px solid rgba(255,255,255,.04)">${idx+1}</td>
+      <td style="padding:5px 10px;font-weight:700;color:${p.fromSch?'#93c5fd':'var(--white)'};text-align:left;border-right:1px solid rgba(255,255,255,.04)">
+        ${p.name}${p.fromSch?'':''}</td>
+      <td style="padding:5px 10px;text-align:center;color:var(--gold-light);font-weight:700;border-right:1px solid rgba(255,255,255,.04)">${p.qty}개</td>
+      <td style="padding:5px 10px;text-align:right;color:var(--g200);border-right:1px solid rgba(255,255,255,.04)">₩${p.unit.toLocaleString()}</td>
+      <td style="padding:5px 10px;text-align:left;border-right:1px solid rgba(255,255,255,.04)"><span style="font-size:10px;background:rgba(201,168,76,.1);color:var(--gold-light);border:1px solid rgba(201,168,76,.25);padding:1px 5px;border-radius:2px">${PRICE_LABEL[p.priceType]||'직접입력'}</span></td>
+      <td style="padding:5px 10px;text-align:center;border-right:1px solid rgba(255,255,255,.04)">${p.dep?'<span style="font-size:10px;background:rgba(253,230,138,.12);color:#fde68a;border:1px solid rgba(253,230,138,.28);padding:1px 5px;border-radius:2px">10%↓</span>':'<span style="font-size:10px;color:var(--g500)">—</span>'}</td>
+      <td style="padding:5px 10px;text-align:right;font-weight:700;color:var(--white);border-right:1px solid rgba(255,255,255,.04)">₩${payAmt.toLocaleString()}</td>
+      <td style="padding:5px 10px;text-align:left;border-right:1px solid rgba(255,255,255,.04)"><span style="font-size:10px;background:rgba(0,0,0,.2);color:${caseColor};border:1px solid ${caseColor}44;padding:1px 5px;border-radius:2px">${CASE_LABEL[p.caseType]}</span></td>
+      <td style="padding:5px 10px;text-align:right;font-weight:700;color:#93c5fd;border-right:1px solid rgba(255,255,255,.04)">₩${krAmt.toLocaleString()}</td>
+      <td style="padding:5px 10px;text-align:right;font-weight:700;color:#86efac;border-right:1px solid rgba(255,255,255,.04)">₩${jpAmt.toLocaleString()}</td>
+      <td style="padding:5px 10px;text-align:center"><button onclick="removePatient(${p.id}); renderStatTab();" style="background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.28);color:#f87171;padding:2px 7px;font-size:10px;cursor:pointer;border-radius:2px;font-family:'Malgun Gothic',sans-serif;font-weight:700">삭제</button></td>`;
+    tbody.appendChild(tr);
+  });
+  ['s-total-pay','s-total-kr','s-total-jp'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent='₩'+[totalPay,totalKR,totalJP][i].toLocaleString();
+  });
+  ['s-cnt','s-sum-pay','s-sum-kr','s-sum-jp'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=i===0?(patients.length+'명'):'₩'+[totalPay,totalPay,totalKR,totalJP][i].toLocaleString();
+  });
+  // 운영탭 요약도 갱신
+  const opsEl=document.getElementById('ops-pt-cnt');
+  if(opsEl) opsEl.textContent=patients.length+'명';
+  const opsKr=document.getElementById('ops-kr-rev');
+  if(opsKr) opsKr.textContent='₩'+totalKR.toLocaleString();
+  const opsJp=document.getElementById('ops-jp-rev');
+  if(opsJp) opsJp.textContent='₩'+totalJP.toLocaleString();
+}
+
+function renderCharts(){
+  const total=patients.reduce((a,p)=>{
+    const pay=p.dep?Math.round(p.qty*p.unit*0.9):p.qty*p.unit;
+    return a+pay;
+  },0);
+
+  // 케이스별
+  const caseData={A:{cnt:0,rev:0},B:{cnt:0,rev:0}};
+  patients.forEach(p=>{
+    const pay=p.dep?Math.round(p.qty*p.unit*0.9):p.qty*p.unit;
+    caseData[p.caseType].cnt++;
+    caseData[p.caseType].rev+=pay;
+  });
+  const caseBox=document.getElementById('chart-case');
+  if(caseBox){
+    const rows=[
+      {label:'케이스 A (한국상담+일본세팅)', key:'A', color:'#93c5fd', krPct:50},
+      {label:'케이스 B (한국 전체)',          key:'B', color:'#86efac', krPct:100},
+    ];
+    caseBox.innerHTML=rows.map(r=>{
+      const d=caseData[r.key];
+      const pct=total>0?Math.round(d.rev/total*100):0;
+      const krAmt=Math.round(d.rev*r.krPct/100);
+      return `<div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:11px;color:${r.color};font-weight:700">${r.label}</span>
+          <span style="font-size:11px;color:var(--white);font-weight:700">${d.cnt}명 · ₩${d.rev.toLocaleString()}</span>
+        </div>
+        <div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:${pct}%;background:${r.key==='A'?'linear-gradient(90deg,#3b82f6,#93c5fd)':'linear-gradient(90deg,#16a34a,#86efac)'}"></div></div>
+        <div style="font-size:10px;color:var(--g500);margin-top:2px">한국 귀속 ₩${krAmt.toLocaleString()} (${r.krPct}%) · 전체 대비 ${pct}%</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 수가별
+  const ptData={};
+  patients.forEach(p=>{
+    const k=p.priceType||'custom';
+    if(!ptData[k]) ptData[k]={cnt:0,rev:0};
+    const pay=p.dep?Math.round(p.qty*p.unit*0.9):p.qty*p.unit;
+    ptData[k].cnt++;
+    ptData[k].rev+=pay;
+  });
+  const ptBox=document.getElementById('chart-ptype');
+  if(ptBox){
+    const order=['norm','rnose','rface','qty','custom'];
+    const colors={norm:'var(--gold)',rnose:'#86efac',rface:'#93c5fd',qty:'#fde68a',custom:'var(--g400)'};
+    ptBox.innerHTML=order.filter(k=>ptData[k]).map(k=>{
+      const d=ptData[k];
+      const pct=total>0?Math.round(d.rev/total*100):0;
+      return `<div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:11px;color:${colors[k]};font-weight:700">${PRICE_LABEL[k]||k}</span>
+          <span style="font-size:11px;color:var(--white);font-weight:700">${d.cnt}명 · ₩${d.rev.toLocaleString()}</span>
+        </div>
+        <div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:${pct}%;background:${colors[k]}"></div></div>
+      </div>`;
+    }).join('') || '<div style="font-size:11px;color:var(--g500);padding:8px 0">데이터 없음</div>';
+  }
+
+  // 예약금 할인
+  const depY=patients.filter(p=>p.dep);
+  const depN=patients.filter(p=>!p.dep);
+  const depYRev=depY.reduce((a,p)=>a+Math.round(p.qty*p.unit*0.9),0);
+  const depNRev=depN.reduce((a,p)=>a+p.qty*p.unit,0);
+  const saving=patients.reduce((a,p)=>a+(p.dep?Math.round(p.qty*p.unit*0.1):0),0);
+  const depBox=document.getElementById('chart-dep');
+  if(depBox){
+    const pct=total>0?Math.round(depYRev/total*100):0;
+    depBox.innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div class="stat-card"><div style="font-size:9px;color:var(--g400);margin-bottom:3px">🎫 예약금 결제 환자</div><div style="font-size:18px;font-weight:700;color:#fde68a">${depY.length}명</div><div style="font-size:10px;color:var(--g500)">₩${depYRev.toLocaleString()}</div></div>
+        <div class="stat-card"><div style="font-size:9px;color:var(--g400);margin-bottom:3px">미결제 환자</div><div style="font-size:18px;font-weight:700;color:var(--g300)">${depN.length}명</div><div style="font-size:10px;color:var(--g500)">₩${depNRev.toLocaleString()}</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--g400);margin-bottom:4px">결제 환자 매출 비중</div>
+      <div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#b45309,#fde68a)"></div></div>
+      <div style="font-size:10px;color:#fde68a;margin-top:4px;font-weight:700">총 할인 절감액: ₩${saving.toLocaleString()}</div>`;
+  }
+
+  // 손익
+  const profitBox=document.getElementById('chart-profit');
+  if(profitBox){
+    const simKR=window._simRevKR||0;
+    const cost=parseFloat(document.getElementById('kpi-cost')?.textContent?.replace(/[₩,]/g,''))||0;
+    const profit=simKR-cost;
+    const roi=cost>0?(profit/cost*100).toFixed(1):0;
+    const pctCost=simKR>0?Math.min(100,Math.round(cost/simKR*100)):0;
+    const items=[
+      {label:'한국 귀속 매출',v:simKR,color:'#93c5fd'},
+      {label:'총 투입 비용', v:cost,  color:'#888'},
+      {label:'순이익 (한국)',v:profit, color:profit>=0?'#86efac':'#f87171'},
+    ];
+    profitBox.innerHTML=items.map(it=>{
+      const pct=simKR>0?Math.min(100,Math.round(Math.abs(it.v)/simKR*100)):0;
+      return `<div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:${it.color};font-weight:700">${it.label}</span>
+          <span style="font-size:11px;color:var(--white);font-weight:700">${it.v>=0?'':'−'}₩${Math.abs(it.v).toLocaleString()}</span>
+        </div>
+        <div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:${pct}%;background:${it.color}"></div></div>
+      </div>`;
+    }).join('')
+    + `<div style="margin-top:8px;padding:8px 12px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:2px;display:flex;justify-content:space-between">
+        <span style="font-size:11px;color:var(--g400)">ROI</span>
+        <span style="font-size:14px;font-weight:700;color:${profit>=0?'var(--gold-light)':'#f87171'}">${roi}%</span>
+      </div>`;
+  }
+}
+
+// np2 추가 (통계탭용)
+function onNp2PriceChange(){
+  const pt=document.getElementById('np2-pricetype').value;
+  const qty=parseInt(document.getElementById('np2-qty').value)||6;
+  if(pt!=='custom'){
+    const u=getUnitFromTable(pt,qty);
+    if(u!==null) document.getElementById('np2-unit').value=u;
+  }
+}
+function setNp2Dep(v){
+  document.getElementById('np2-dep').value=v;
+  document.getElementById('np2-dep-off').className=v===0?'dt-off active-off':'dt-off';
+  document.getElementById('np2-dep-on').className=v===1?'dt-on  active-on':'dt-on';
+}
+function addPatient2(){
+  const name=document.getElementById('np2-name').value.trim()||('환자'+(patientIdCnt+1));
+  const qty=Math.max(1,parseInt(document.getElementById('np2-qty').value)||6);
+  const pt=document.getElementById('np2-pricetype').value;
+  let unit=parseFloat(document.getElementById('np2-unit').value)||0;
+  if(pt!=='custom'){const u=getUnitFromTable(pt,qty);if(u!==null)unit=u;}
+  const dep=parseInt(document.getElementById('np2-dep').value)||0;
+  const caseType=document.getElementById('np2-case').value;
+  patientIdCnt++;
+  patients.push({id:patientIdCnt,name,qty,unit,priceType:pt,dep,caseType});
+  document.getElementById('np2-name').value='';
+  renderPatients();
+  renderStatTab();
+  calcAll();
+}
+
+// ══════════════════════════════════════════════
+// 섹션 숨김 토글
+// ══════════════════════════════════════════════
+function toggleSecCost(){
+  const body=document.getElementById('body-cost');
+  const btn=document.getElementById('tog-cost');
+  if(!body||!btn) return;
+  const collapsed=body.classList.toggle('collapsed');
+  btn.classList.toggle('collapsed',collapsed);
+  btn.title=collapsed?'펼치기':'숨기기';
+}
+
+function toggleSec(id){
+  const body = document.getElementById('body-'+id);
+  const btn  = document.getElementById('tog-'+id);
+  if(!body||!btn) return;
+  const collapsed = body.classList.toggle('collapsed');
+  btn.classList.toggle('collapsed', collapsed);
+  btn.title = collapsed ? '펼치기' : '숨기기';
+}
+
+// ══════════════════════════════════════════════
+// 핵심 매출 계산 (patients 배열 기준 직접 계산)
+// ══════════════════════════════════════════════
+function calcRevFromPatients(){
+  let totalPay=0, totalKR=0, totalJP=0;
+  patients.forEach(p=>{
+    const baseAmt = p.qty * p.unit;
+    const payAmt  = p.dep ? Math.round(baseAmt*0.9) : baseAmt;
+    const krAmt   = p.caseType==='A' ? Math.round(payAmt*0.5) : payAmt;
+    const jpAmt   = p.caseType==='A' ? Math.round(payAmt*0.5) : 0;
+    totalPay += payAmt;
+    totalKR  += krAmt;
+    totalJP  += jpAmt;
+  });
+  window._simRevKR    = totalKR;
+  window._simRevJP    = totalJP;
+  window._simRevTotal = totalPay;
+  return {totalPay, totalKR, totalJP};
+}
+
+function calcCost(){
+  const rate=(vn('c-rate')||950)/100;
+  const fixed=vn('c-rent-jpy')*rate+vn('c-rent-krw')+vn('c-mkt')+vn('c-misc')+vn('c-travel');
+  const fsEl=document.getElementById('fixed-sub');
+  if(fsEl) fsEl.textContent='₩'+Math.round(fixed).toLocaleString();
+
+  let staff=0;
+  Object.entries(staffData).forEach(([id,s])=>{
+    const sub=s.unit==='시급'?(s.rate||0)*(s.count||1)*(s.hours||8):(s.rate||0)*(s.count||1);
+    staff+=sub;
+    const el=document.getElementById('ss-'+id);
+    if(el) el.textContent='₩'+Math.round(sub).toLocaleString();
+  });
+  const ssEl=document.getElementById('staff-sub');
+  if(ssEl) ssEl.textContent='₩'+Math.round(staff).toLocaleString();
+  return fixed+staff;
+}
+
+// ══════════════════════════════════════════════
+// 메인 KPI 계산
+// ══════════════════════════════════════════════
+function calcAll(){
+  const cost = calcCost();
+  const {totalPay:rev, totalKR:revKR, totalJP:revJP} = calcRevFromPatients();
+
+  const profit = revKR - cost;
+  const roi    = cost>0 ? profit/cost*100 : 0;
+
+  // hidden KPI elements (통계탭에서 s-xxx로 표시)
+  setText('kpi-cost',   '₩'+Math.round(cost).toLocaleString());
+  setText('kpi-rev',    '₩'+Math.round(rev).toLocaleString());
+  setText('kpi-rev-kr', '₩'+Math.round(revKR).toLocaleString());
+  setText('kpi-rev-jp', '₩'+Math.round(revJP).toLocaleString());
+  setText('kpi-profit', '₩'+Math.round(profit).toLocaleString());
+  setText('kpi-roi',    roi.toFixed(1)+'%');
+
+  // 통계탭 KPI 카드 직접 업데이트
+  setText('s-cost',   '₩'+Math.round(cost).toLocaleString());
+  setText('s-rev-kr', '₩'+Math.round(revKR).toLocaleString());
+  setText('s-rev-jp', '₩'+Math.round(revJP).toLocaleString());
+  const sPEl=document.getElementById('s-profit');
+  if(sPEl){ sPEl.textContent='₩'+Math.round(profit).toLocaleString(); sPEl.className='kpi-val '+(profit>=0?'val-pos':'val-neg'); }
+
+  // 운영탭 요약 카드 업데이트
+  setText('ops-kr-rev', '₩'+Math.round(revKR).toLocaleString());
+  setText('ops-jp-rev', '₩'+Math.round(revJP).toLocaleString());
+  setText('ops-pt-cnt', patients.length+'명');
+}
+
+function setText(id, txt){
+  const el=document.getElementById(id);
+  if(el) el.textContent=txt;
+}
+
+// ── 토스트 ─────────────────────────────────
+function showToast(){
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+// ══════════════════════════════════════════════
+// 초기화
+// ══════════════════════════════════════════════
+function init(){
+  const t=new Date();
+  const p=n=>String(n).padStart(2,'0');
+  document.getElementById('event-date').value=`${t.getFullYear()}-${p(t.getMonth()+1)}-${p(t.getDate())}`;
+
+  // 모든 수가표 렌더링
+  SUBS.forEach(s=>renderTable(s));
+
+  // 기본 인건비
+  [{role:'상담 실장 A',rate:200000,unit:'일당',count:1,hours:10},
+   {role:'상담 실장 B',rate:200000,unit:'일당',count:1,hours:10},
+   {role:'통역사',rate:18000,unit:'시급',count:1,hours:10},
+   {role:'의료진',rate:300000,unit:'일당',count:1,hours:10}
+  ].forEach(s=>addStaff(s.role,s.rate,s.unit,s.count,s.hours));
+
+  renderSchedule();
+  updateNpPreview();
+  calcAll();
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
