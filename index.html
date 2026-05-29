@@ -1,0 +1,2914 @@
+
+<style>
+  /* ── 색상 토큰 ── */
+  :root{
+    /* 배경 계층 (밝은 크림→베이지) */
+    --bg-base:#F7F4EE;      /* 페이지 배경 */
+    --bg-0:#FFFFFF;          /* 카드 최상위 */
+    --bg-1:#F2EEE6;          /* 카드 내부 섹션 */
+    --bg-2:#E8E3D8;          /* 서브섹션·호버 */
+    --bg-3:#DDD7CA;          /* 구분선 영역 */
+    /* 텍스트 */
+    --tx-900:#1C1A17;        /* 최고 강조 */
+    --tx-700:#3A3630;        /* 본문 */
+    --tx-500:#6B6458;        /* 보조 */
+    --tx-300:#A09890;        /* 플레이스홀더 */
+    --tx-100:#C8C0B4;        /* 비활성 */
+    /* 액센트: 앰버 골드 */
+    --gold:#B8922A;
+    --gold-light:#C9A84C;
+    --gold-bright:#E8CC7A;
+    --gold-dim:#7A5F1A;
+    --gold-pale:#F5EDD4;     /* 베이지 금 하이라이트 */
+    /* 상태 색상 */
+    --green:#1A7A4A;   --green-bg:#E8F5EE;  --green-bd:#A8D5B8;
+    --blue:#1A5A8A;    --blue-bg:#E8F0F8;   --blue-bd:#A8C4DC;
+    --red:#9A2A2A;     --red-bg:#F8E8E8;    --red-bd:#D4A8A8;
+    --amber:#7A5810;   --amber-bg:#FBF3E0;  --amber-bd:#D4B870;
+    /* 레거시 호환 (기존 코드가 참조하는 변수) */
+    --black:#1C1A17;
+    --g900:#F7F4EE; --g800:#F2EEE6; --g700:#E8E3D8; --g600:#DDD7CA;
+    --g500:#A09890; --g400:#6B6458; --g300:#3A3630; --g200:#2A2620; --white:#1C1A17;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg-base);
+    color:var(--tx-700);
+    font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',sans-serif;
+    font-size:13px;min-height:100vh;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%,rgba(184,146,42,.07) 0%,transparent 60%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23B8922A' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-track{background:var(--bg-1)}
+  ::-webkit-scrollbar-thumb{background:var(--bg-3);border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--gold-light)}
+
+  /* ── 카드 ── */
+  .card{
+    background:var(--bg-0);
+    border:1px solid var(--bg-3);
+    border-radius:6px;
+    position:relative;overflow:hidden;
+    box-shadow:0 1px 4px rgba(28,26,23,.06),0 4px 16px rgba(28,26,23,.04);
+  }
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold-light),var(--gold-bright),var(--gold-light),transparent);opacity:.6}
+
+  /* ── KPI 카드 ── */
+  .kpi-card{
+    background:linear-gradient(145deg,var(--bg-0),var(--bg-1));
+    border:1px solid var(--bg-3);
+    border-radius:6px;padding:14px 18px;
+    transition:border-color .25s,box-shadow .25s,transform .2s;
+    box-shadow:0 1px 3px rgba(28,26,23,.05);
+  }
+  .kpi-card:hover{border-color:var(--gold);box-shadow:0 4px 14px rgba(184,146,42,.12);transform:translateY(-1px)}
+  .kpi-lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx-500);margin-bottom:5px;font-weight:700}
+  .kpi-val{font-size:22px;font-weight:700;color:var(--tx-900);line-height:1.2}
+  .kpi-sub{font-size:10px;color:var(--tx-300);margin-top:5px;letter-spacing:.08em}
+
+  /* ── 섹션 헤더 ── */
+  .sec-hdr{display:flex;align-items:center;gap:10px;padding:11px 20px;
+    border-bottom:1px solid var(--bg-2);background:var(--bg-1)}
+  .sec-num{font-size:11px;font-weight:700;letter-spacing:.18em;
+    background:var(--gold);color:#fff;
+    padding:2px 7px;border-radius:3px;min-width:28px;text-align:center}
+  .sec-ttl{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-700);font-weight:700}
+  .sec-sub{font-size:10px;color:var(--tx-500);margin-top:1px}
+
+  /* ── 입력 필드 ── */
+  .inp{
+    background:var(--bg-0);
+    border:1px solid var(--bg-3);
+    border-radius:4px;
+    color:var(--tx-900);
+    padding:6px 10px;
+    font-family:'Malgun Gothic','맑은 고딕',sans-serif;
+    font-size:12px;width:100%;outline:none;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,42,.1)}
+  .inp::placeholder{color:var(--tx-300)}
+  select.inp{
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23B8922A' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 9px center;padding-right:26px;cursor:pointer;
+  }
+  textarea.inp{resize:vertical;min-height:56px;line-height:1.7}
+  .lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500);margin-bottom:4px;display:block}
+
+  /* ── 테이블 셀 입력 ── */
+  .cell-inp{
+    background:transparent;border:none;
+    border-bottom:1.5px solid var(--bg-3);
+    color:var(--tx-900);
+    font-family:'Malgun Gothic','맑은 고딕',sans-serif;
+    font-size:12px;font-weight:700;text-align:right;
+    outline:none;width:100%;padding:2px 4px;transition:border-color .2s;
+  }
+  .cell-inp:focus{border-bottom-color:var(--gold);background:var(--gold-pale)}
+  .cell-inp.ro{border-color:transparent;color:var(--gold);cursor:default}
+  .cell-inp.dv{color:var(--green)}
+
+  /* ── 버튼 ── */
+  .btn-gold{
+    background:linear-gradient(135deg,var(--gold),var(--gold-dim));
+    color:#fff;border:none;
+    padding:7px 15px;
+    font-family:'Malgun Gothic','맑은 고딕',sans-serif;
+    font-size:11px;font-weight:700;cursor:pointer;
+    border-radius:4px;
+    transition:opacity .2s,box-shadow .2s,transform .1s;
+    white-space:nowrap;
+    box-shadow:0 1px 4px rgba(184,146,42,.25);
+    letter-spacing:.04em;
+  }
+  .btn-gold:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 3px 10px rgba(184,146,42,.35)}
+  .btn-out{
+    background:transparent;color:var(--tx-700);
+    border:1px solid var(--bg-3);
+    padding:6px 14px;
+    font-family:'Malgun Gothic','맑은 고딕',sans-serif;
+    font-size:11px;font-weight:700;cursor:pointer;border-radius:4px;
+    transition:border-color .2s,background .2s;
+  }
+  .btn-out:hover{border-color:var(--gold);background:var(--gold-pale)}
+  .btn-del{
+    background:var(--red-bg);color:var(--red);
+    border:1px solid var(--red-bd);
+    padding:5px 12px;
+    font-family:'Malgun Gothic','맑은 고딕',sans-serif;
+    font-size:11px;font-weight:700;cursor:pointer;border-radius:4px;
+  }
+  .btn-del:hover{background:rgba(154,42,42,.12)}
+  .btn-sm{
+    padding:3px 9px;font-size:10px;
+    background:var(--gold-pale);color:var(--gold-dim);
+    border:1px solid var(--gold-bright);
+    font-family:'Malgun Gothic','맑은 고딕',sans-serif;
+    font-weight:700;cursor:pointer;border-radius:3px;white-space:nowrap;
+  }
+  .btn-sm:hover{background:rgba(184,146,42,.15)}
+  .btn-save{
+    background:var(--green-bg);color:var(--green);
+    border:1px solid var(--green-bd);
+    padding:5px 15px;
+    font-family:'Malgun Gothic','맑은 고딕',sans-serif;
+    font-size:11px;font-weight:700;cursor:pointer;border-radius:4px;
+  }
+  .btn-save:hover{background:rgba(26,122,74,.1)}
+  .btn-edit{
+    background:var(--amber-bg);color:var(--amber);
+    border:1px solid var(--amber-bd);
+    padding:5px 15px;
+    font-family:'Malgun Gothic','맑은 고딕',sans-serif;
+    font-size:11px;font-weight:700;cursor:pointer;border-radius:4px;
+  }
+  .btn-edit:hover{background:rgba(122,88,16,.1)}
+
+  /* ── 구분선·프로그레스 ── */
+  .gdiv{height:1px;background:var(--bg-2);margin:12px 0}
+  .pbar{height:4px;background:var(--bg-2);border-radius:3px;overflow:hidden;margin-top:7px}
+  .pfill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold-bright));border-radius:3px;transition:width .5s ease}
+  /* 숨김 토글 */
+  .sec-body{transition:max-height .35s ease,opacity .35s ease,padding .35s ease;overflow:hidden}
+  .sec-body.collapsed{max-height:0!important;opacity:0;padding-top:0!important;padding-bottom:0!important}
+  .toggle-btn{background:none;border:none;cursor:pointer;color:var(--tx-300);font-size:16px;padding:2px 6px;line-height:1;transition:transform .3s,color .2s;user-select:none}
+  .toggle-btn:hover{color:var(--gold)}
+  .toggle-btn.collapsed{transform:rotate(-90deg)}
+  /* 숨김 모드일 때 카드 하단선 제거 */
+  .card.sec-collapsed::before{opacity:0}
+
+  /* Firebase 설정 패널 */
+  .fb-panel{position:fixed;inset:0;background:rgba(28,26,23,.7);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center}
+  .fb-box{background:var(--bg-0);border:1px solid var(--bg-3);border-top:3px solid var(--gold);border-radius:4px;width:600px;max-width:96vw;max-height:94vh;overflow-y:auto;box-shadow:0 0 60px rgba(201,168,76,.15)}
+  .fb-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:5px 10px;border-radius:2px}
+  .fb-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+  .fb-err{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+  .fb-idle{background:var(--bg-2);color:var(--tx-500);border:1px solid var(--bg-3)}
+  .fb-connecting{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+  /* 실시간 저장 표시 */
+  .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--bg-3);display:inline-block;transition:background .3s}
+  .sync-dot.saving{background:var(--amber);animation:pulse .8s infinite}
+  .sync-dot.saved{background:var(--green)}
+  .sync-dot.error{background:var(--red)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* ticker — inline에서 처리 */
+
+  /* 수가표 팝업 (모달 내부용) */
+  .price-popup{background:var(--bg-1);border:1px solid var(--bg-3);border-radius:3px;overflow:hidden;margin-top:8px}
+  .price-popup-tabs{display:flex;border-bottom:2px solid var(--bg-3);background:var(--bg-1)}
+  .price-popup-tab{flex:1;padding:6px 4px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;border:none;background:transparent;color:var(--tx-500);font-family:'Malgun Gothic',sans-serif;transition:all .18s;border-bottom:2px solid transparent}
+  .price-popup-tab.active{color:var(--gold-dim);border-bottom-color:var(--gold);background:var(--gold-pale)}
+  .price-popup-tab:hover:not(.active){color:var(--tx-700)}
+  .ppanel{display:none}.ppanel.active{display:block}
+  .ptbl-sm{width:100%;border-collapse:collapse;font-size:11px}
+  .ptbl-sm th{padding:5px 8px;font-size:9px;letter-spacing:.1em;color:var(--gold-dim);border-bottom:1px solid var(--bg-3);background:var(--bg-2);font-weight:700;text-align:right;white-space:nowrap}
+  .ptbl-sm th:first-child{text-align:center;width:48px}
+  .ptbl-sm td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--bg-2);color:var(--tx-700);vertical-align:middle;cursor:pointer}
+  .ptbl-sm td:first-child{text-align:center;color:var(--gold-dim);font-weight:700}
+  .ptbl-sm tr:hover td{background:var(--gold-pale)!important;color:var(--tx-900)!important}
+  .ptbl-sm tr.psel td{background:rgba(184,146,42,.15)!important;color:var(--gold-dim)!important;font-weight:700}
+  /* 스케줄 그리드: 메모 컬럼 추가 */
+  /* .sch-hdr override removed — handled by base CSS */
+  /* .sch-row override removed — handled by base CSS */
+
+  /* 수가표 → 시뮬레이션 연동 */
+
+  .ptbl tr.linked:not(.em){background:rgba(201,168,76,.18)!important;outline:2px solid var(--gold);outline-offset:-1px}
+  .ptbl tr.linked td{color:var(--tx-900)!important}
+  @keyframes flashGold{0%{background:rgba(201,168,76,.35)}100%{background:transparent}}
+  .flash-gold{animation:flashGold .6s ease}
+  /* 툴바 선택 표시 */
+  .np-selected-badge{display:none;align-items:center;gap:6px;padding:4px 10px;background:var(--gold-pale);border:1px solid var(--gold-bright);border-radius:4px;font-size:11px;color:var(--gold-dim);font-weight:700;white-space:nowrap}
+  .np-selected-badge.show{display:flex}
+  /* 예약금 토글 버튼 */
+  .dep-toggle{display:flex;border:1px solid var(--bg-3);border-radius:4px;overflow:hidden;height:32px}
+  .dep-toggle button{flex:1;border:none;cursor:pointer;font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:11px;font-weight:700;transition:all .18s;padding:0 10px;white-space:nowrap}
+  .dep-toggle button.dt-off{background:var(--bg-1);color:var(--tx-500)}
+  .dep-toggle button.dt-off:hover{background:rgba(255,255,255,.08);color:var(--tx-700)}
+  .dep-toggle button.dt-on{background:var(--amber-bg);color:var(--amber);border-left:1px solid var(--amber-bd)}
+  .dep-toggle button.dt-on:hover{background:rgba(253,230,138,.28)}
+  .dep-toggle button.active-off{background:rgba(248,113,113,.12)!important;color:#f87171!important}
+  .dep-toggle button.active-on{background:rgba(253,230,138,.3)!important;color:#7a5010!important;box-shadow:inset 0 0 0 1px rgba(253,230,138,.5)}
+
+  /* 서브탭 */
+
+  .stab{padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);font-family:'Malgun Gothic','맑은 고딕',sans-serif;background:transparent;color:var(--tx-500);border-radius:2px;transition:all .2s;white-space:nowrap}
+  .stab.active{background:rgba(201,168,76,.12);color:var(--gold);border-color:rgba(201,168,76,.35)}
+  .stab:not(.active):hover{color:var(--tx-700)}
+
+  /* 가격표 */
+  .ptbl{width:100%;border-collapse:collapse;font-size:12px}
+  .ptbl th{padding:7px 10px;font-size:10px;letter-spacing:.1em;color:var(--gold);border-bottom:1px solid rgba(201,168,76,.22);background:rgba(201,168,76,.05);font-weight:700;white-space:nowrap;text-align:right}
+  .ptbl th:first-child{text-align:center}
+  .ptbl td{padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+  .ptbl td:first-child{text-align:center;color:var(--gold);font-weight:700;font-size:13px}
+  .ptbl tr:hover td{background:rgba(201,168,76,.04);cursor:pointer}
+  .ptbl tr.sel td{background:rgba(201,168,76,.12)!important}
+  .ptbl tr.sel td:first-child{color:var(--gold)!important}
+  .em{background:rgba(255,255,255,.02)!important}
+
+  /* 결과박스 */
+  .res-box{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.22);border-radius:2px;padding:12px 16px}
+
+  /* 매출표 */
+  .rev-tbl{width:100%;border-collapse:collapse;font-size:12px}
+  .rev-tbl th{padding:8px 12px;font-size:10px;letter-spacing:.1em;color:var(--gold);border-bottom:1px solid rgba(201,168,76,.22);background:rgba(201,168,76,.05);font-weight:700;white-space:nowrap;text-align:right}
+  .rev-tbl th:first-child{text-align:left}
+  .rev-tbl td{padding:7px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;font-size:12px}
+  .rev-tbl td:first-child{text-align:left;color:var(--tx-700)}
+  .rev-tbl tr.total-row td{background:rgba(201,168,76,.07);font-weight:700;border-top:1px solid rgba(201,168,76,.22)}
+  .rev-tbl tr.total-row td:first-child{color:var(--gold)}
+  .rev-inp{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);border-radius:2px;color:var(--tx-900);font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:12px;font-weight:700;text-align:right;outline:none;padding:4px 8px;width:90px;transition:border-color .2s}
+  .rev-inp:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.12)}
+  .pct-inp{width:70px}
+
+  /* 스테퍼 */
+  .stepper{display:flex;align-items:center;gap:7px}
+  .step-btn{width:26px;height:26px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.32);color:var(--gold);cursor:pointer;border-radius:2px;font-size:17px;display:flex;align-items:center;justify-content:center;font-weight:700;transition:background .15s}
+  .step-btn:hover{background:rgba(201,168,76,.28)}
+  .step-val{font-size:18px;font-weight:700;color:var(--tx-900);min-width:30px;text-align:center}
+
+  /* 스케줄러 */
+  .sch-wrap{overflow-x:auto}
+  /* 컬럼: 시간|담당실장|환자명|상태|시술항목|수량|예약금|예상매출|메모|관리 */
+  .sch-cols{grid-template-columns:72px 160px 130px 72px 150px 56px 72px 96px 1fr 58px}
+  .sch-hdr{display:grid;background:var(--bg-1);border-bottom:2px solid var(--gold-light);min-width:980px}
+  .sch-hdr.sch-cols,.sch-row.sch-cols{grid-template-columns:72px 160px 130px 72px 150px 56px 72px 96px 1fr 58px}
+  .sch-hc{padding:8px 8px;font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold-dim);border-right:1px solid var(--bg-3);font-weight:700;white-space:nowrap;background:var(--bg-1)}
+  .sch-row{display:grid;min-width:980px;border-bottom:1px solid var(--bg-2);transition:background .15s;align-items:stretch}
+  .sch-row:hover{background:var(--gold-pale)}
+  .sch-row.booked{background:linear-gradient(90deg,rgba(184,146,42,.08),transparent)}
+  .sch-row.hr-on{border-top:2px solid var(--gold-light)}
+  .sch-row.hr-half{border-top:1px dashed var(--bg-3)}
+  .sch-cell{padding:6px 8px;border-right:1px solid var(--bg-2);display:flex;align-items:center;font-size:11px;min-height:44px}
+  .sch-cell:last-child{border-right:none}
+  .time-lbl{font-size:11px;font-weight:700;color:var(--tx-900);white-space:nowrap}
+  .time-lbl.half{font-size:10px;color:var(--tx-300);font-weight:500}
+  .mgr-name-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:2px;white-space:nowrap;display:inline-block}
+  /* 실장 색상 (최대 6명) */
+  .mc0{background:rgba(184,146,42,.12);color:var(--gold-dim);border:1px solid rgba(184,146,42,.4)}
+  .mc1{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)}
+  .mc2{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+  .mc3{background:#fce7f3;color:#9d174d;border:1px solid #fbcfe8}
+  .mc4{background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd}
+  .mc5{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+  .memo-cell-full{font-size:11px;color:var(--tx-700);line-height:1.6;white-space:pre-wrap;word-break:break-all;width:100%}
+  .ba{font-size:9px;font-weight:700;padding:1px 5px;background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.3);border-radius:2px;white-space:nowrap}
+  .bb{font-size:9px;font-weight:700;padding:1px 5px;background:rgba(100,149,237,.12);color:#1a4f8a;border:1px solid rgba(100,149,237,.3);border-radius:2px;white-space:nowrap}
+  .sbadge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px;white-space:nowrap}
+  .sb-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+  .sb-wt{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+  .sb-qi{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)}
+  .sb-cx{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+  .sb-paid{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+  .sb-unpaid{background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;font-weight:800}
+  .sb-noshow{background:#f3e8ff;color:#6b21a8;border:1px solid #d8b4fe}
+
+  /* 모달 */
+  .modal-ov{position:fixed;inset:0;background:rgba(28,26,23,.6);backdrop-filter:blur(8px);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+  .modal-ov.active{opacity:1;pointer-events:all}
+  .modal-box{background:var(--bg-0);border:1px solid var(--bg-3);border-top:3px solid var(--gold);border-radius:8px;box-shadow:0 20px 60px rgba(28,26,23,.2);width:520px;max-width:96vw;max-height:92vh;overflow-y:auto;transform:translateY(14px);transition:transform .22s}
+  .modal-ov.active .modal-box{transform:translateY(0)}
+
+  /* 토스트 */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--bg-0);border:1px solid var(--green-bd);color:var(--green);box-shadow:0 4px 16px rgba(28,26,23,.12);padding:10px 18px;border-radius:3px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+  .toast.show{opacity:1}
+
+  /* 메인 탭 */
+  .main-tabs{display:flex;gap:0;border-bottom:2px solid var(--bg-3);margin-bottom:20px;background:var(--bg-0);border-radius:8px 8px 0 0;overflow:hidden;box-shadow:0 1px 4px rgba(28,26,23,.05)}
+  .main-tab{padding:12px 32px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--tx-500);font-family:'Malgun Gothic','맑은 고딕',sans-serif;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;letter-spacing:.08em;text-transform:uppercase}
+  .main-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--gold-pale)}
+  .main-tab:hover:not(.active){color:var(--tx-700);background:var(--bg-1)}
+  .tab-panel{display:none}.tab-panel.active{display:flex;flex-direction:column;gap:16px}
+  /* 차트 */
+  .chart-bar-wrap{background:var(--bg-2);border-radius:3px;overflow:hidden;height:16px;position:relative}
+  .chart-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+  .chart-bar-kr{background:linear-gradient(90deg,#1a4f8a,#2a6faa)}
+  .chart-bar-jp{background:linear-gradient(90deg,#1a6b3c,#2a8a50)}
+  .chart-bar-cost{background:linear-gradient(90deg,#666,#999)}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat-card{background:var(--bg-1);border:1px solid var(--bg-3);border-radius:6px;padding:14px 16px}
+  /* 언어 토글 */
+  .lang-btn{padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bg-3);font-family:'Malgun Gothic','맑은 고딕',sans-serif;background:var(--bg-0);color:var(--tx-500);border-radius:4px;transition:all .2s;white-space:nowrap}
+  .lang-btn.active{background:var(--gold-pale);color:var(--gold-dim);border-color:var(--gold-dim)}
+  .lang-btn:hover:not(.active){color:var(--tx-700);background:var(--bg-1)}
+  /* 운영 메모 카드 */
+  .memo-card{background:var(--g900);border:1px solid rgba(255,255,255,.08);border-radius:2px;padding:12px 14px;position:relative;transition:border-color .2s}
+  .memo-card:hover{border-color:rgba(201,168,76,.25)}
+  .memo-cat-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:2px;white-space:nowrap;letter-spacing:.08em}
+  .cat-ops{background:var(--gold-pale);color:var(--gold-dim);border:1px solid var(--gold-bright)}
+  .cat-issue{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+  .cat-patient{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)}
+  .cat-staff{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+  .cat-etc{background:var(--bg-2);color:var(--tx-500);border:1px solid var(--bg-3)}
+  /* 섹션 01 번호 카드 */
+  .sec-order-card{background:var(--bg-0);border:1px solid var(--bg-3);border-radius:6px;padding:10px 18px;display:flex;align-items:center;gap:10px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(28,26,23,.06)}
+  .sec-order-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.4}
+  .val-pos{color:var(--green)}.val-neg{color:var(--red)}.val-gold{color:var(--gold)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .fu{animation:fadeUp .4s ease forwards}
+
+  /* 10% 할인 배지 */
+  .disc10-badge{display:inline-flex;align-items:center;gap:4px;background:var(--amber-bg);border:1px solid var(--amber-bd).3);color:#7a5010;padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700;letter-spacing:.06em}
+</style>
+</head>
+<body>
+<div class="toast" id="toast">✓ 저장 완료</div>
+
+<!-- HEADER -->
+<header style="background:var(--bg-0);border-bottom:2px solid var(--bg-3);box-shadow:0 2px 12px rgba(28,26,23,.08)">
+  <div style="max-width:1480px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <div style="font-size:18px;font-weight:700;letter-spacing:.32em;color:var(--tx-900);line-height:1">BLACKFILM</div>
+        <div style="width:100%;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-bright),transparent)"></div>
+      </div>
+      <div style="width:1px;height:32px;background:var(--bg-3)"></div>
+      <div>
+        <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--tx-500);font-weight:700" id="header-title">일본환자 유치 상담회</div>
+        <div style="font-size:10px;color:var(--tx-300);margin-top:2px;letter-spacing:.08em" id="header-sub">Operation &amp; P&amp;L Dashboard</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div>
+        <label class="lbl" style="margin-bottom:2px">상담회 일자</label>
+        <input type="date" id="event-date" class="inp" style="width:138px;font-size:11px" onchange="updateInfoBar()">
+      </div>
+      <div>
+        <label class="lbl" style="margin-bottom:2px">장소</label>
+        <select id="event-location" class="inp" style="width:160px;font-size:11px" onchange="onLocationChange()">
+          <option value="">— 선택 —</option>
+          <option value="2D치과">2D치과</option>
+          <option value="BF긴자치과">BF긴자치과</option>
+          <option value="custom">직접입력</option>
+        </select>
+      </div>
+      <div id="event-location-custom-wrap" style="display:none">
+        <label class="lbl" style="margin-bottom:2px">직접 입력</label>
+        <input type="text" id="event-location-custom" class="inp" placeholder="장소 입력" style="width:140px;font-size:11px">
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:4px;padding-bottom:1px">
+        <button class="lang-btn active" id="lang-kr" onclick="setLang('kr')">🇰🇷 한국어</button>
+        <button class="lang-btn" id="lang-jp" onclick="setLang('jp')">🇯🇵 日本語</button>
+      </div>
+    </div>
+  </div>
+  <div class="ticker" style="height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-bright),var(--gold),transparent);opacity:.5"></div>
+  <!-- Firebase 상태 바 -->
+  <div style="background:var(--bg-1);border-top:1px solid var(--bg-2);padding:5px 24px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-status-text" style="font-size:10px;color:var(--tx-500);letter-spacing:.06em">Firebase 미연결 — 로컬 모드</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span id="fb-status-badge" class="fb-status fb-idle">⚡ 미연결</span>
+      <button onclick="connectFb()" style="background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green);padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;border-radius:3px;font-family:'Malgun Gothic',sans-serif" title="Firebase 재연결">🔄 재연결</button>
+      <button onclick="openFbPanel()" style="background:var(--gold-pale);border:1px solid var(--gold-bright);color:var(--gold-dim);padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;border-radius:3px;font-family:'Malgun Gothic',sans-serif;letter-spacing:.06em">🔥 Firebase 설정</button>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:1480px;margin:0 auto;padding:20px 24px">
+
+<!-- ── 메인 탭 네비게이션 ── -->
+<div class="main-tabs">
+  <button class="main-tab active" id="mtab-ops" onclick="switchMainTab('ops')">📋 당일 운영</button>
+  <button class="main-tab" id="mtab-stats" onclick="switchMainTab('stats')">📊 매출 통계</button>
+</div>
+
+<!-- ══ 탭 A: 당일 운영 ══ -->
+<div id="panel-ops" class="tab-panel active">
+
+<!-- ══ 01 비용 구조는 매출통계 탭으로 이동 → 숨김 엘리먼트만 유지 ══ -->
+<!-- KPI hidden elements (통계탭에서 업데이트, 당일운영탭에 표시 안 함) -->
+<span id="kpi-cost" style="display:none">₩0</span>
+<span id="kpi-rev" style="display:none">₩0</span>
+<span id="kpi-rev-kr" style="display:none">₩0</span>
+<span id="kpi-rev-jp" style="display:none">₩0</span>
+<span id="kpi-profit" style="display:none">₩0</span>
+<span id="kpi-roi" style="display:none">0%</span>
+<span id="pg-cost" style="display:none"></span>
+<span id="pg-rev" style="display:none"></span>
+<span id="pg-rev-kr" style="display:none"></span>
+<span id="pg-rev-jp" style="display:none"></span>
+<span id="pg-profit" style="display:none"></span>
+<span id="pg-roi" style="display:none"></span>
+
+
+<!-- ══ 01 상담회 정보 요약 ══ -->
+<div class="sec-order-card fu">
+  <span class="sec-num">01</span>
+  <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;flex:1">
+    <div>
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-500);font-weight:700">상담회 일자</div>
+      <div id="info-date" style="font-size:15px;font-weight:700;color:var(--tx-900);margin-top:2px">—</div>
+    </div>
+    <div style="width:1px;height:28px;background:rgba(201,168,76,.2)"></div>
+    <div>
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-500);font-weight:700">장소</div>
+      <div id="info-location" style="font-size:15px;font-weight:700;color:var(--tx-900);margin-top:2px">—</div>
+    </div>
+    <div style="width:1px;height:28px;background:rgba(201,168,76,.2)"></div>
+    <div>
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-500);font-weight:700">등록 환자</div>
+      <div id="info-pt-cnt" style="font-size:15px;font-weight:700;color:var(--gold);margin-top:2px">0명</div>
+    </div>
+    <div style="width:1px;height:28px;background:rgba(201,168,76,.2)"></div>
+    <div>
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-500);font-weight:700">총 블랙필름</div>
+      <div id="info-films" style="font-size:15px;font-weight:700;color:var(--gold);margin-top:2px">0개</div>
+    </div>
+    <div style="flex:1"></div>
+    <div id="lang-notice" style="font-size:11px;color:var(--tx-500);letter-spacing:.04em;display:none">
+      <span style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);padding:3px 10px;border-radius:2px;color:var(--gold);font-weight:700">🇯🇵 日本語モード</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 02 수가표 (일본 수가 기준) ══ -->
+<section class="card fu">
+  <div class="sec-hdr" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="sec-num">02</span>
+      <div>
+        <div class="sec-ttl">블랙필름 수가표 — Price Calculator</div>
+        <div class="sec-sub">일본 파트너사 수가 기준 · 단가·할인율 직접 입력 후 저장 · 합계 자동 계산</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span class="disc10-badge">🎫 당일 예약금 10% 결제 시 10% 할인</span>
+      <button class="toggle-btn" id="tog-02" onclick="toggleSec('02')" title="숨기기/펼치기">▾</button>
+    </div>
+  </div>
+
+  <!-- 서브탭 -->
+  <div id="body-02" class="sec-body" style="max-height:3000px">
+  <div style="padding:12px 20px;border-bottom:1px solid rgba(201,168,76,.1);display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="stab active" id="st-norm" onclick="switchSub('norm')">정가표</button>
+      <button class="stab" id="st-rnose" onclick="switchSub('rnose')">리뷰할인 (코밑사진)</button>
+      <button class="stab" id="st-rface" onclick="switchSub('rface')">리뷰할인 (얼굴전체)</button>
+      <button class="stab" id="st-qty" onclick="switchSub('qty')">갯수할인</button>
+    </div>
+    <div id="cur-edit-btns" style="display:flex;gap:6px">
+      <button class="btn-edit" id="edit-btn" onclick="toggleEdit()">✏️ 수정</button>
+      <button class="btn-save" id="save-btn" onclick="saveCurrentTable();showSaveToast()" style="display:none">💾 저장</button>
+    </div>
+  </div>
+
+  <div style="padding:16px 20px">
+    <!-- 정가표 -->
+    <div id="sp-norm">
+      <div style="font-size:11px;color:var(--tx-500);line-height:1.7;margin-bottom:10px">
+        · 정가 기준 단가 · 할인 없음 · 행 클릭 시 <span class="disc10-badge" style="padding:1px 6px;font-size:9px">당일 예약금 10% 할인 금액</span> 포함 결과 표시
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ptbl" id="tbl-norm">
+          <thead><tr>
+            <th style="text-align:center;width:55px">갯수</th>
+            <th style="width:150px">단가 (₩)</th>
+            <th style="width:160px">합계 (₩)</th>
+            <th style="width:160px">당일 예약금 10% 결제 시 10%↓ (₩)</th>
+          </tr></thead>
+          <tbody id="tbody-norm"></tbody>
+        </table>
+      </div>
+      <div id="rb-norm" style="margin-top:12px"></div>
+    </div>
+
+    <!-- 코밑리뷰 -->
+    <div id="sp-rnose" style="display:none">
+      <div style="font-size:11px;color:var(--tx-500);line-height:1.7;margin-bottom:10px">
+        · 코밑 사진 리뷰 제공 시 적용 · 단가 또는 할인율 입력 시 나머지 자동 계산 · 당일 예약금 10% 결제 시 추가 10% 할인
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ptbl" id="tbl-rnose">
+          <thead><tr>
+            <th style="text-align:center;width:55px">갯수</th>
+            <th style="width:130px">정가 단가 (₩)</th>
+            <th style="width:70px">할인율 (%)</th>
+            <th style="width:130px">할인 단가 (₩)</th>
+            <th style="width:145px">합계 (₩)</th>
+            <th style="width:155px">당일 예약금 10% 결제 시 10%↓ (₩)</th>
+          </tr></thead>
+          <tbody id="tbody-rnose"></tbody>
+        </table>
+      </div>
+      <div id="rb-rnose" style="margin-top:12px"></div>
+    </div>
+
+    <!-- 얼굴리뷰 -->
+    <div id="sp-rface" style="display:none">
+      <div style="font-size:11px;color:var(--tx-500);line-height:1.7;margin-bottom:10px">
+        · 얼굴 전체 사진 리뷰 제공 시 적용 · 단가 또는 할인율 입력 시 나머지 자동 계산 · 당일 예약금 10% 결제 시 추가 10% 할인
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ptbl" id="tbl-rface">
+          <thead><tr>
+            <th style="text-align:center;width:55px">갯수</th>
+            <th style="width:130px">정가 단가 (₩)</th>
+            <th style="width:70px">할인율 (%)</th>
+            <th style="width:130px">할인 단가 (₩)</th>
+            <th style="width:145px">합계 (₩)</th>
+            <th style="width:155px">당일 예약금 10% 결제 시 10%↓ (₩)</th>
+          </tr></thead>
+          <tbody id="tbody-rface"></tbody>
+        </table>
+      </div>
+      <div id="rb-rface" style="margin-top:12px"></div>
+    </div>
+
+    <!-- 갯수할인 -->
+    <div id="sp-qty" style="display:none">
+      <div style="font-size:11px;color:var(--tx-500);line-height:1.7;margin-bottom:10px">
+        · 리뷰 조건 없음 · 갯수에 따른 자동 할인율 적용 · 단가 또는 할인율 입력 시 나머지 자동 계산 · 당일 예약금 10% 결제 시 추가 10% 할인
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ptbl" id="tbl-qty">
+          <thead><tr>
+            <th style="text-align:center;width:55px">갯수</th>
+            <th style="width:130px">정가 단가 (₩)</th>
+            <th style="width:70px">할인율 (%)</th>
+            <th style="width:130px">할인 단가 (₩)</th>
+            <th style="width:145px">합계 (₩)</th>
+            <th style="width:155px">당일 예약금 10% 결제 시 10%↓ (₩)</th>
+          </tr></thead>
+          <tbody id="tbody-qty"></tbody>
+        </table>
+      </div>
+      <div id="rb-qty" style="margin-top:12px"></div>
+    </div>
+  </div>
+  </div><!-- /sec-body-02 -->
+</section>
+
+<!-- ══ 03 매출 상세 → 매출 통계 탭으로 이동 ══ -->
+<div class="card fu" style="border-color:rgba(201,168,76,.2)">
+  <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:16px;color:var(--gold);font-weight:700">03</span>
+      <div>
+        <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-700);font-weight:700">매출 상세 — Revenue Detail</div>
+        <div style="font-size:10px;color:var(--tx-500);margin-top:1px">환자별 매출은 <strong style="color:var(--gold)">📊 매출 통계 탭</strong>에서 확인·입력 가능합니다</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;color:var(--tx-500);letter-spacing:.12em;text-transform:uppercase">총 환자</div><div id="ops-pt-cnt" style="font-size:15px;font-weight:700;color:var(--gold)">0명</div></div>
+      <div style="width:1px;height:22px;background:rgba(201,168,76,.2)"></div>
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;color:var(--tx-500);letter-spacing:.12em;text-transform:uppercase">🇰🇷 한국 귀속</div><div id="ops-kr-rev" style="font-size:15px;font-weight:700;color:#1a4f8a">₩0</div></div>
+      <div style="width:1px;height:22px;background:rgba(201,168,76,.2)"></div>
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;color:var(--tx-500);letter-spacing:.12em;text-transform:uppercase">🇯🇵 일본 귀속</div><div id="ops-jp-rev" style="font-size:15px;font-weight:700;color:#1a6b3c">₩0</div></div>
+      <button class="btn-gold" onclick="switchMainTab('stats')" style="padding:6px 14px;font-size:11px">📊 매출 통계 탭 열기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 04 스케줄러 ══ -->
+<section class="card fu">
+  <div class="sec-hdr" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="sec-num">04</span>
+      <div><div class="sec-ttl">당일 스케줄러 — Appointment Scheduler</div><div class="sec-sub">09:00 — 21:00 · 30분 단위 · 슬롯별 담당 실장 자유 지정</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500)">등록 환자</div><div id="sch-count" style="font-size:15px;font-weight:700;color:var(--gold)">0명</div></div>
+      <div style="width:1px;height:24px;background:rgba(201,168,76,.2)"></div>
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500)">총 블랙필름</div><div id="sch-films" style="font-size:15px;font-weight:700;color:var(--gold)">0개</div></div>
+      <div style="width:1px;height:24px;background:rgba(201,168,76,.2)"></div>
+      <div style="text-align:right"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500)">예상 매출</div><div id="sch-rev" style="font-size:15px;font-weight:700;color:var(--gold)">₩0</div></div>
+    </div>
+    <button class="toggle-btn" id="tog-04" onclick="toggleSec('04')" title="숨기기/펼치기">▾</button>
+  </div>
+  <div id="body-04" class="sec-body" style="max-height:5000px">
+  <!-- 실장 관리 툴바 -->
+  <div style="padding:8px 20px;background:rgba(201,168,76,.03);border-bottom:1px solid rgba(201,168,76,.12);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:10px;font-weight:700;color:var(--tx-500);letter-spacing:.1em;text-transform:uppercase">실장 등록</span>
+    <div id="mgr-inputs" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"></div>
+    <button id="btn-add-mgr" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;border-radius:2px;font-family:'Malgun Gothic',sans-serif;letter-spacing:.06em">+ 실장 추가</button>
+  </div>
+  <!-- 타임테이블 -->
+  <div class="sch-wrap">
+    <div class="sch-hdr sch-cols">
+      <div class="sch-hc">시간</div>
+      <div class="sch-hc">담당 실장</div>
+      <div class="sch-hc">환자명</div>
+      <div class="sch-hc">상태</div>
+      <div class="sch-hc">시술 항목</div>
+      <div class="sch-hc">수량</div>
+      <div class="sch-hc">예약금</div>
+      <div class="sch-hc">예상 매출</div>
+      <div class="sch-hc">메모</div>
+      <div class="sch-hc" style="text-align:center">관리</div>
+    </div>
+    <div id="schedule-body"></div>
+  </div>
+  </div><!-- /sec-body-04 -->
+</section>
+
+<!-- ══ 05 운영 메모 ══ -->
+<section class="card fu">
+  <div class="sec-hdr" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="sec-num">05</span>
+      <div><div class="sec-ttl">운영 메모 — Operations Notes</div><div class="sec-sub">항목별 메모 관리 · 추가 · 수정 · 삭제</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <!-- 카테고리 필터 -->
+      <select id="memo-filter" class="inp" style="width:110px;font-size:11px" onchange="renderMemos()">
+        <option value="all">전체 보기</option>
+        <option value="ops">운영</option>
+        <option value="issue">이슈</option>
+        <option value="patient">환자</option>
+        <option value="staff">스태프</option>
+        <option value="etc">기타</option>
+      </select>
+      <button class="btn-gold" onclick="openMemoAdd()" style="padding:5px 12px;font-size:11px">+ 메모 추가</button>
+    </div>
+  </div>
+  <!-- 메모 추가 폼 (기본 숨김) -->
+  <div id="memo-add-form" style="display:none;padding:12px 18px;background:rgba(201,168,76,.03);border-bottom:1px solid rgba(201,168,76,.12)">
+    <div style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap">
+      <div>
+        <label class="lbl" style="margin-bottom:2px">카테고리</label>
+        <select id="memo-new-cat" class="inp" style="width:100px;font-size:11px">
+          <option value="ops">운영</option>
+          <option value="issue">이슈</option>
+          <option value="patient">환자</option>
+          <option value="staff">스태프</option>
+          <option value="etc">기타</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <label class="lbl" style="margin-bottom:2px">내용</label>
+        <input type="text" id="memo-new-text" class="inp" placeholder="메모 내용 입력..." style="font-size:12px">
+      </div>
+      <button class="btn-gold" onclick="addMemo();showSaveToast()" style="padding:6px 14px">💾 저장</button>
+      <button class="btn-out" onclick="closeMemoAdd()" style="padding:6px 12px">취소</button>
+    </div>
+  </div>
+  <!-- 메모 목록 -->
+  <div id="memo-list" style="padding:12px 18px;display:flex;flex-direction:column;gap:6px;min-height:60px">
+    <div style="font-size:11px;color:var(--tx-500);text-align:center;padding:16px 0" id="memo-empty">아직 메모가 없습니다. + 메모 추가를 눌러 작성하세요.</div>
+  </div>
+</section>
+
+</div><!-- /panel-ops -->
+
+<!-- ══ 탭 B: 매출 통계 ══ -->
+<div id="panel-stats" class="tab-panel">
+
+  <!-- ── A: 고정 운영비 ── -->
+  <div class="card fu">
+    <div class="sec-hdr" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="sec-num">A</span>
+        <div>
+          <div class="sec-ttl" id="stat-a-ttl">고정 운영비 — Cost Structure</div>
+          <div class="sec-sub" id="stat-a-sub">운영 고정비 및 인건비 입력 → 손익 자동 계산</div>
+        </div>
+      </div>
+      <button class="toggle-btn" id="tog-cost" onclick="toggleSecCost()" title="숨기기/펼치기">▾</button>
+    </div>
+    <div id="body-cost" class="sec-body" style="max-height:2000px">
+    <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:22px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)" id="cost-fixed-lbl">고정 운영비</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label class="lbl" id="lbl-rent-jpy">임차료 (¥)</label><input type="number" id="c-rent-jpy" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+          <div><label class="lbl" id="lbl-rate">환율 (₩/¥100)</label><input type="number" id="c-rate" class="inp" value="950" oninput="calcAll()"></div>
+          <div><label class="lbl" id="lbl-rent-krw">임차료 (₩)</label><input type="number" id="c-rent-krw" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+          <div><label class="lbl" id="lbl-mkt">마케팅비 (₩)</label><input type="number" id="c-mkt" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+          <div><label class="lbl" id="lbl-misc">기타 운영비 (₩)</label><input type="number" id="c-misc" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+          <div><label class="lbl" id="lbl-travel">항공/교통비 (₩)</label><input type="number" id="c-travel" class="inp" placeholder="0" oninput="calcAll()" value="0"></div>
+        </div>
+        <div class="gdiv"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:10px;font-weight:700;color:var(--tx-500);text-transform:uppercase" id="lbl-fixed-sub">고정 운영비 소계</span>
+          <span id="fixed-sub" style="color:var(--tx-900);font-size:14px;font-weight:700">₩0</span>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)" id="cost-staff-lbl">인건비 상세</div>
+          <button class="btn-gold" onclick="addStaff()" style="padding:3px 9px;font-size:10px" id="btn-add-staff">+ 인원 추가</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 90px 58px 52px 58px 78px 22px;gap:4px;align-items:center;padding-bottom:3px;margin-bottom:2px;border-bottom:1px solid rgba(201,168,76,.18)">
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase">직종/성명</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:center">시급/일당</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:center">단위</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:center">인원</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:center">시간</div>
+          <div style="font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;text-align:right">소계</div>
+          <div></div>
+        </div>
+        <div id="staff-list"></div>
+        <div class="gdiv"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:10px;font-weight:700;color:var(--tx-500);text-transform:uppercase" id="lbl-staff-sub">인건비 소계</span>
+          <span id="staff-sub" style="color:var(--tx-900);font-size:14px;font-weight:700">₩0</span>
+        </div>
+      </div>
+    </div>
+    </div><!-- /body-cost -->
+  </div>
+
+  <!-- ── B: 상담회 분석 ── -->
+  <div class="card fu">
+    <div class="sec-hdr" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="sec-num">B</span>
+        <div>
+          <div class="sec-ttl" id="stat-b-ttl">상담회 분석 — Consultation Analysis</div>
+          <div class="sec-sub" id="stat-b-sub">상담·결제·귀속 매출 요약</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:18px 22px">
+      <!-- 상담 현황 카드 행 -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
+        <div class="kpi-card" style="padding:12px 14px">
+          <div class="kpi-lbl" id="b-lbl-reserved">상담 예약</div>
+          <div id="b-reserved" class="kpi-val" style="font-size:20px">0명</div>
+          <div class="kpi-sub" id="b-sub-reserved">Scheduled</div>
+        </div>
+        <div class="kpi-card" style="padding:12px 14px">
+          <div class="kpi-lbl" id="b-lbl-visited">내원 총</div>
+          <div id="b-visited" class="kpi-val" style="font-size:20px">0명</div>
+          <div class="kpi-sub">Visited</div>
+        </div>
+        <div class="kpi-card" style="padding:12px 14px;border-color:rgba(201,168,76,.35)">
+          <div class="kpi-lbl" id="b-lbl-paid">결제 완료</div>
+          <div id="b-paid" class="kpi-val val-gold" style="font-size:20px">0명</div>
+          <div class="kpi-sub">Paid</div>
+        </div>
+        <div class="kpi-card" style="padding:12px 14px">
+          <div class="kpi-lbl" id="b-lbl-unpaid">미결제</div>
+          <div id="b-unpaid" class="kpi-val" style="font-size:20px;color:var(--tx-700)">0명</div>
+          <div class="kpi-sub">Unpaid</div>
+        </div>
+        <div class="kpi-card" style="padding:12px 14px">
+          <div class="kpi-lbl" id="b-lbl-films">총 블랙필름</div>
+          <div id="b-films" class="kpi-val val-gold" style="font-size:20px">0개</div>
+          <div class="kpi-sub">Total Films</div>
+        </div>
+        <div class="kpi-card" style="padding:12px 14px;border-color:#d8b4fe;background:#faf5ff">
+          <div class="kpi-lbl" style="color:#6b21a8">🚫 노쇼</div>
+          <div id="b-noshow" class="kpi-val" style="font-size:20px;color:#6b21a8">0명</div>
+          <div class="kpi-sub">No-Show</div>
+        </div>
+      </div>
+      <!-- 매출 귀속 행 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <div class="res-box" style="padding:12px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--tx-500);margin-bottom:5px" id="b-lbl-total-rev">총 결제금액</div>
+          <div id="b-total-rev" style="font-size:22px;font-weight:700;color:var(--gold)">₩0</div>
+          <div style="font-size:10px;color:var(--tx-500);margin-top:3px" id="b-sub-total">Total Revenue</div>
+        </div>
+        <div class="res-box" style="padding:12px 16px;border-color:#a8c4dc;background:#e8f0f8">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#1a4f8a;margin-bottom:5px" id="b-lbl-kr">🇰🇷 한국 귀속 매출</div>
+          <div id="b-kr-rev" style="font-size:22px;font-weight:700;color:#1a4f8a">₩0</div>
+          <div style="font-size:10px;color:var(--tx-500);margin-top:3px">Korea Revenue</div>
+        </div>
+        <div class="res-box" style="padding:12px 16px;border-color:#a8d5b8;background:#e8f5ee">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#1a6b3c;margin-bottom:5px" id="b-lbl-jp">🇯🇵 일본 귀속 매출</div>
+          <div id="b-jp-rev" style="font-size:22px;font-weight:700;color:#1a6b3c">₩0</div>
+          <div style="font-size:10px;color:var(--tx-500);margin-top:3px">Japan Revenue</div>
+        </div>
+        <div class="res-box" style="padding:12px 16px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--tx-500);margin-bottom:5px" id="b-lbl-profit">순매출 (한국기준)</div>
+          <div id="b-profit" style="font-size:22px;font-weight:700;color:var(--tx-900)">₩0</div>
+          <div style="font-size:10px;color:var(--tx-500);margin-top:3px" id="b-sub-profit">Net Profit (KR)</div>
+        </div>
+      </div>
+      <!-- 예약금 할인 바 차트 -->
+      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)" id="b-chart-case-ttl">케이스별 매출 분포</div>
+          <div id="b-chart-case" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)" id="b-chart-dep-ttl">예약금 할인 현황</div>
+          <div id="b-chart-dep" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── C: 매출 상세 (환자 목록) ── -->
+  <div class="card fu">
+    <div class="sec-hdr" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="sec-num">C</span>
+        <div>
+          <div class="sec-ttl" id="stat-c-ttl">매출 상세 — Revenue Detail</div>
+          <div class="sec-sub" id="stat-c-sub">스케줄러 자동 연동 · 환자별 수가·케이스별 귀속 매출</div>
+        </div>
+      </div>
+      <span class="disc10-badge">🎫 당일 예약금 10% 결제 시 10% 할인</span>
+    </div>
+    <div style="padding:10px 18px;background:rgba(201,168,76,.03);border-bottom:1px solid rgba(201,168,76,.1);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:10px;font-weight:700;color:var(--tx-500);letter-spacing:.1em;text-transform:uppercase" id="c-add-lbl">환자 직접 추가</span>
+      <div style="display:flex;align-items:flex-end;gap:6px;flex-wrap:wrap">
+        <div><label class="lbl" style="margin-bottom:2px" id="c-lbl-name">환자명</label><input type="text" id="np2-name" class="inp" placeholder="환자명" style="width:100px;font-size:11px"></div>
+        <div><label class="lbl" style="margin-bottom:2px" id="c-lbl-qty">수량</label><input type="number" id="np2-qty" class="inp" value="6" min="1" style="width:60px;font-size:11px"></div>
+        <div><label class="lbl" style="margin-bottom:2px" id="c-lbl-pt">수가 구분</label>
+          <select id="np2-pricetype" class="inp" style="width:120px;font-size:11px" onchange="onNp2PriceChange()">
+            <option value="custom">직접입력</option>
+            <option value="norm">정가</option>
+            <option value="rnose">리뷰(코밑)</option>
+            <option value="rface">리뷰(얼굴)</option>
+            <option value="qty">갯수할인</option>
+          </select>
+        </div>
+        <div><label class="lbl" style="margin-bottom:2px" id="c-lbl-unit">단가(₩/개)</label><input type="number" id="np2-unit" class="inp" value="0" style="width:110px;font-size:11px"></div>
+        <div><label class="lbl" style="margin-bottom:2px" id="c-lbl-case">케이스</label>
+          <select id="np2-case" class="inp" style="width:160px;font-size:11px">
+            <option value="B">케이스 B — 한국 전체 (100%)</option>
+            <option value="A">케이스 A — 한국상담+일본세팅 (50%)</option>
+          </select>
+        </div>
+        <div><label class="lbl" style="margin-bottom:2px" id="c-lbl-dep">예약금 10%↓</label>
+          <div class="dep-toggle" style="height:30px">
+            <button id="np2-dep-off" class="dt-off active-off" onclick="setNp2Dep(0)" id="np2-btn-off">미결제</button>
+            <button id="np2-dep-on"  class="dt-on"             onclick="setNp2Dep(1)" id="np2-btn-on">🎫 결제→10%↓</button>
+          </div>
+          <input type="hidden" id="np2-dep" value="0">
+        </div>
+        <button class="btn-gold" onclick="addPatient2()" style="height:30px;padding:0 14px" id="c-btn-add">+ 추가</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:900px">
+        <thead>
+          <tr style="background:rgba(201,168,76,.07);border-bottom:1px solid rgba(201,168,76,.22)">
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:center;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)">#</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:left;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)" id="c-th-name">환자명</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:center;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)" id="c-th-qty">수량</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:right;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)" id="c-th-unit">단가(₩)</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:left;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)" id="c-th-pt">수가구분</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:center;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)" id="c-th-dep">예약금10%↓</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:right;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)" id="c-th-pay">결제금액(₩)</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:left;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)" id="c-th-case">케이스</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:right;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)" id="c-th-kr">🇰🇷 한국 귀속</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:right;white-space:nowrap;border-right:1px solid rgba(201,168,76,.1)" id="c-th-jp">🇯🇵 일본 귀속</th>
+            <th style="padding:7px 10px;font-size:9px;letter-spacing:.1em;color:var(--gold);font-weight:700;text-align:center;white-space:nowrap" id="c-th-del">삭제</th>
+          </tr>
+        </thead>
+        <tbody id="patient-tbody2"></tbody>
+        <tfoot>
+          <tr style="background:rgba(201,168,76,.08);border-top:2px solid rgba(201,168,76,.3)">
+            <td colspan="6" style="padding:8px 10px;font-size:11px;font-weight:700;color:var(--gold);text-align:right" id="c-tf-sum">합계</td>
+            <td id="s-total-pay" style="padding:8px 10px;font-size:13px;font-weight:700;color:var(--gold);text-align:right">₩0</td>
+            <td style="padding:8px 10px"></td>
+            <td id="s-total-kr"  style="padding:8px 10px;font-size:13px;font-weight:700;color:#1a4f8a;text-align:right">₩0</td>
+            <td id="s-total-jp"  style="padding:8px 10px;font-size:13px;font-weight:700;color:#1a6b3c;text-align:right">₩0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div style="padding:14px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-top:1px solid rgba(201,168,76,.12)">
+      <div class="res-box" style="padding:10px 14px"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500);margin-bottom:4px" id="c-lbl-cnt">총 환자 수</div><div id="s-cnt" style="font-size:22px;font-weight:700;color:var(--gold)">0명</div></div>
+      <div class="res-box" style="padding:10px 14px"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500);margin-bottom:4px" id="c-lbl-pay">총 결제금액</div><div id="s-sum-pay" style="font-size:22px;font-weight:700;color:var(--gold)">₩0</div></div>
+      <div class="res-box" style="padding:10px 14px;border-color:rgba(100,149,237,.3);background:rgba(100,149,237,.05)"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#1a4f8a;margin-bottom:4px" id="c-lbl-kr">🇰🇷 한국 귀속 매출</div><div id="s-sum-kr" style="font-size:22px;font-weight:700;color:#1a4f8a">₩0</div></div>
+      <div class="res-box" style="padding:10px 14px;border-color:rgba(134,239,172,.25);background:rgba(134,239,172,.04)"><div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#1a6b3c;margin-bottom:4px" id="c-lbl-jp">🇯🇵 일본 귀속 매출</div><div id="s-sum-jp" style="font-size:22px;font-weight:700;color:#1a6b3c">₩0</div></div>
+    </div>
+  </div>
+
+  <!-- ── D: 매출 분석 차트 ── -->
+  <div class="card fu">
+    <div class="sec-hdr">
+      <span class="sec-num">D</span>
+      <div>
+        <div class="sec-ttl" id="stat-d-ttl">매출 분석 차트 — Revenue Analytics</div>
+        <div class="sec-sub" id="stat-d-sub">수가별 · 할인별 매출 분포</div>
+      </div>
+    </div>
+    <div style="padding:18px 22px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)" id="d-ttl-ptype">수가 구분별 환자 수 / 매출</div>
+        <div id="chart-ptype" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.18)" id="d-ttl-profit">손익 분석</div>
+        <div id="chart-profit" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-stats -->
+
+
+</main>
+
+<footer style="border-top:1px solid rgba(201,168,76,.1);padding:11px 22px;text-align:center;margin-top:6px">
+  <div style="font-size:10px;color:var(--tx-500);letter-spacing:.2em;text-transform:uppercase;font-weight:700">BLACKFILM — CONFIDENTIAL — Internal Operations Dashboard</div>
+</footer>
+
+<!-- MODAL -->
+<div id="slot-modal" class="modal-ov" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" style="width:640px">
+    <div style="padding:13px 17px;border-bottom:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold)">예약 등록 / 수정</div>
+        <div id="modal-lbl" style="font-size:10px;color:var(--tx-500);margin-top:1px"></div>
+      </div>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--tx-500);font-size:20px;cursor:pointer;padding:0 6px;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px 17px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label class="lbl">환자명</label><input type="text" id="m-name" class="inp" placeholder="환자명 입력"></div>
+        <div><label class="lbl">예약 상태</label>
+          <select id="m-status" class="inp">
+            <option value="확정">✅ 확정</option>
+            <option value="대기">⏳ 대기</option>
+            <option value="문의">💬 문의</option>
+            <option value="결제완료">💳 결제완료</option>
+            <option value="미결제">🔴 미결제</option>
+            <option value="노쇼">🚫 노쇼</option>
+            <option value="취소">❌ 취소</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">시술 항목</label>
+          <div style="display:flex;gap:5px">
+            <select id="m-proc-type" class="inp" style="width:180px;font-size:11px" onchange="onProcTypeChange()">
+              <option value="">— 선택 —</option>
+              <option value="블랙필름(베니어)">블랙필름 (베니어)</option>
+              <option value="블랙필름(크라운)">블랙필름 (크라운)</option>
+              <option value="custom">직접입력</option>
+            </select>
+            <input type="text" id="m-proc" class="inp" placeholder="직접 입력 또는 선택" style="flex:1;font-size:11px">
+          </div>
+        </div>
+        <div><label class="lbl">케이스 유형</label>
+          <select id="m-case" class="inp">
+            <option value="B">케이스 B — 한국 전체 (100%)</option>
+            <option value="A">케이스 A — 한국 상담 / 일본 세팅 (50%)</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">수가 구분</label>
+          <select id="m-pricetype" class="inp" onchange="onModalPriceTypeChange()">
+            <option value="custom">직접입력</option>
+            <option value="norm">정가</option>
+            <option value="rnose">리뷰할인(코밑)</option>
+            <option value="rface">리뷰할인(얼굴)</option>
+            <option value="qty">갯수할인</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">단가 (₩/개) <span id="m-unit-badge" style="font-size:9px;color:var(--tx-500);font-weight:400;letter-spacing:0">— 수가표에서 클릭하거나 직접 입력</span></label>
+          <input type="number" id="m-unit" class="inp" placeholder="0" value="0" oninput="onModalUnitInput();calcModalPreview()">
+        </div>
+      </div>
+      <!-- 수가표 팝업 -->
+      <div id="modal-price-popup" class="price-popup" style="display:none">
+        <div style="padding:8px 12px;background:rgba(201,168,76,.06);border-bottom:1px solid rgba(201,168,76,.15);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;text-transform:uppercase">수가표 — 행 클릭 시 단가·수량 자동 입력</span>
+          <button onclick="closeModalPricePopup()" style="background:none;border:none;color:var(--tx-500);cursor:pointer;font-size:16px;line-height:1;padding:0 4px">×</button>
+        </div>
+        <div class="price-popup-tabs">
+          <button class="price-popup-tab active" onclick="switchModalPTab('norm',this)">정가</button>
+          <button class="price-popup-tab" onclick="switchModalPTab('rnose',this)">리뷰(코밑)</button>
+          <button class="price-popup-tab" onclick="switchModalPTab('rface',this)">리뷰(얼굴)</button>
+          <button class="price-popup-tab" onclick="switchModalPTab('qty',this)">갯수할인</button>
+        </div>
+        <div style="max-height:200px;overflow-y:auto">
+          <div class="ppanel active" id="mpanel-norm"></div>
+          <div class="ppanel" id="mpanel-rnose"></div>
+          <div class="ppanel" id="mpanel-rface"></div>
+          <div class="ppanel" id="mpanel-qty"></div>
+        </div>
+      </div>
+
+      <div style="padding:12px 14px;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.2);border-radius:2px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">블랙필름 수량</div>
+        <div class="stepper" style="justify-content:center">
+          <button class="step-btn" onclick="changeMQty(-1)" style="width:36px;height:36px;font-size:22px">−</button>
+          <span id="m-qty-d" class="step-val" style="font-size:28px;min-width:50px">0</span>
+          <button class="step-btn" onclick="changeMQty(1)" style="width:36px;height:36px;font-size:22px">+</button>
+        </div>
+        <input type="hidden" id="m-qty" value="0">
+        <div style="text-align:center;font-size:10px;color:var(--tx-500);margin-top:5px">개</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="lbl">예약금 결제 여부 <span class="disc10-badge" style="padding:1px 5px;font-size:9px">결제 시 → 10%↓ 자동 적용</span></label>
+          <div class="dep-toggle" style="height:34px">
+            <button id="m-dep-off" class="dt-off active-off" onclick="setMDep(0)" type="button">미결제</button>
+            <button id="m-dep-on"  class="dt-on"             onclick="setMDep(1)" type="button">🎫 결제 → 10%↓</button>
+          </div>
+          <input type="hidden" id="m-dep" value="0">
+        </div>
+        <div>
+          <label class="lbl">예상 매출 (₩) <span style="font-size:9px;color:var(--tx-500);font-weight:400;letter-spacing:0">— 단가×수량 기준 자동 계산 (직접 수정 가능)</span></label>
+          <input type="number" id="m-rev" class="inp" placeholder="0" value="0">
+        </div>
+      </div>
+      <div><label class="lbl">메모</label><input type="text" id="m-memo" class="inp" placeholder="특이사항, 요청사항 등"></div>
+    </div>
+    <div style="padding:10px 17px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:7px;justify-content:flex-end;align-items:center">
+      <button class="btn-del" id="m-del" onclick="deleteSlot()" style="margin-right:auto;display:none">삭제</button>
+      <button class="btn-out" onclick="closeModal()">취소</button>
+      <button class="btn-gold" onclick="saveSlot();showSaveToast()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// 탭 전환
+// ══════════════════════════════════════════════
+function switchMainTab(tab){
+  ['ops','stats'].forEach(function(t){
+    var p=document.getElementById('panel-'+t);
+    var b=document.getElementById('mtab-'+t);
+    if(p) p.classList.toggle('active', t===tab);
+    if(b) b.classList.toggle('active', t===tab);
+  });
+  if(tab==='stats'){
+    syncSchToPatients();
+    renderStatTab();
+  }
+}
+
+function renderStatIfOpen(){
+  var p=document.getElementById('panel-stats');
+  if(p&&p.classList.contains('active')) renderStatTab();
+}
+
+function renderStatTab(){
+  renderSchRevDetail();
+  renderAnalysisB();
+  renderCharts();
+  calcAll();
+}
+
+function renderPatients2(){ renderSchRevDetail(); }
+
+function renderAnalysisB(){
+  var schSlots=Object.values(scheduleData).filter(function(s){return s&&s.name;});
+  var reserved=schSlots.length;
+  var visited=schSlots.filter(function(s){return s.status==='확정'||s.status==='대기'||s.status==='결제완료'||s.status==='미결제';}).length;
+  var paid=schSlots.filter(function(s){return s.status==='결제완료'||(s.dep&&Number(s.dep)>0);}).length;
+  var unpaid=schSlots.filter(function(s){return s.status==='미결제';}).length;
+  var noshow=schSlots.filter(function(s){return s.status==='노쇼';}).length;
+  var films=schSlots.reduce(function(a,s){return a+Number(s.qty||0);},0);
+  setText('b-reserved',reserved+'명'); setText('b-visited',visited+'명');
+  setText('b-paid',paid+'명'); setText('b-unpaid',unpaid+'명'); setText('b-films',films+'개');
+  var rev=calcRevAmounts(); var cost=calcCost(); var profit=rev.totalKR-cost;
+  setText('b-total-rev','₩'+rev.totalPay.toLocaleString());
+  setText('b-kr-rev','₩'+rev.totalKR.toLocaleString());
+  setText('b-jp-rev','₩'+rev.totalJP.toLocaleString());
+  var bP=document.getElementById('b-profit');
+  if(bP){bP.textContent='₩'+profit.toLocaleString();bP.className='kpi-val '+(profit>=0?'val-pos':'val-neg');}
+  var caseBox=document.getElementById('b-chart-case');
+  if(caseBox){
+    var caseData={A:{cnt:0,rev:0},B:{cnt:0,rev:0}};
+    Object.values(scheduleData).forEach(function(s){
+      if(!s||!s.name||s.status==='취소') return;
+      var qty=Number(s.qty)||0,unit=Number(s.unit)||0,dep=(s.dep&&Number(s.dep)>0)?1:0;
+      var base=qty*unit; var pay=base>0?(dep?Math.round(base*.9):base):(Number(s.rev)||0);
+      var ct=s.case==='A'?'A':'B'; caseData[ct].cnt++; caseData[ct].rev+=pay;
+    });
+    caseBox.innerHTML=[
+      {label:'케이스 A (한국상담+일본세팅)',key:'A',color:'#1a4f8a',bar:'linear-gradient(90deg,#1a4f8a,#2a6faa)'},
+      {label:'케이스 B (한국 전체)',key:'B',color:'#1a6b3c',bar:'linear-gradient(90deg,#1a6b3c,#2a8a50)'}
+    ].map(function(r){
+      var d=caseData[r.key]||{cnt:0,rev:0};
+      var pct=rev.totalPay>0?Math.round(d.rev/rev.totalPay*100):0;
+      return '<div><div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        +'<span style="font-size:11px;color:'+r.color+';font-weight:700">'+r.label+'</span>'
+        +'<span style="font-size:11px;color:var(--tx-900);font-weight:700">'+d.cnt+'명 · ₩'+d.rev.toLocaleString()+'</span>'
+        +'</div><div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:'+pct+'%;background:'+r.bar+'"></div></div>'
+        +'<div style="font-size:10px;color:var(--tx-500);margin-top:2px">전체의 '+pct+'%</div></div>';
+    }).join('');
+  }
+  var depBox=document.getElementById('b-chart-dep');
+  if(depBox){
+    var depY=schSlots.filter(function(s){return s.dep&&Number(s.dep)>0;});
+    var depN=schSlots.filter(function(s){return !s.dep||Number(s.dep)===0;});
+    var getRevFn=function(s){var q=Number(s.qty)||0,u=Number(s.unit)||0,b=q*u,d=(s.dep&&Number(s.dep)>0)?1:0;return b>0?(d?Math.round(b*.9):b):(Number(s.rev)||0);};
+    var depYRev=depY.reduce(function(a,s){return a+getRevFn(s);},0);
+    var depNRev=depN.reduce(function(a,s){return a+getRevFn(s);},0);
+    var saving=depY.reduce(function(a,s){var q=Number(s.qty)||0,u=Number(s.unit)||0,b=q*u;return a+(b>0?Math.round(b*.1):0);},0);
+    var pct2=rev.totalPay>0?Math.round(depYRev/rev.totalPay*100):0;
+    depBox.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+      +'<div class="stat-card"><div style="font-size:9px;color:var(--tx-500);margin-bottom:3px">🎫 예약금 결제</div><div style="font-size:18px;font-weight:700;color:var(--amber)">'+depY.length+'명</div><div style="font-size:10px;color:var(--tx-500)">₩'+depYRev.toLocaleString()+'</div></div>'
+      +'<div class="stat-card"><div style="font-size:9px;color:var(--tx-500);margin-bottom:3px">미결제</div><div style="font-size:18px;font-weight:700;color:var(--tx-500)">'+depN.length+'명</div><div style="font-size:10px;color:var(--tx-300)">₩'+depNRev.toLocaleString()+'</div></div>'
+      +'</div><div style="font-size:10px;color:var(--tx-500);margin-bottom:4px">결제 환자 매출 비중</div>'
+      +'<div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:'+pct2+'%;background:linear-gradient(90deg,var(--gold-dim),var(--gold))"></div></div>'
+      +'<div style="font-size:10px;color:var(--amber);margin-top:4px;font-weight:700">총 할인 절감액: ₩'+saving.toLocaleString()+'</div>';
+  }
+}
+
+function renderCharts(){
+  var rev=calcRevAmounts(), totalPay=rev.totalPay, totalKR=rev.totalKR;
+  var cost=calcCost(), profit=totalKR-cost;
+  var ptData={};
+  Object.values(scheduleData).forEach(function(s){
+    if(!s||!s.name||s.status==='취소') return;
+    var k=s.priceType||'custom';
+    if(!ptData[k]) ptData[k]={cnt:0,rev:0};
+    var q=Number(s.qty)||0,u=Number(s.unit)||0,dep=(s.dep&&Number(s.dep)>0)?1:0;
+    var b=q*u; var pay=b>0?(dep?Math.round(b*.9):b):(Number(s.rev)||0);
+    ptData[k].cnt++; ptData[k].rev+=pay;
+  });
+  var ptBox=document.getElementById('chart-ptype');
+  if(ptBox){
+    var colors={norm:'var(--gold-dim)',rnose:'#1a6b3c',rface:'#1a4f8a',qty:'var(--amber)',custom:'var(--tx-500)'};
+    var pl=typeof PRICE_LABEL!=='undefined'?PRICE_LABEL:{norm:'정가',rnose:'리뷰(코밑)',rface:'리뷰(얼굴)',qty:'갯수할인',custom:'직접입력'};
+    var rows=['norm','rnose','rface','qty','custom'].filter(function(k){return ptData[k];});
+    ptBox.innerHTML=rows.length===0?'<div style="font-size:11px;color:var(--tx-300);padding:8px 0">데이터 없음</div>'
+      :rows.map(function(k){
+        var d=ptData[k]; var pct=totalPay>0?Math.round(d.rev/totalPay*100):0;
+        return '<div><div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+          +'<span style="font-size:11px;color:'+(colors[k]||'var(--tx-500)')+';font-weight:700">'+(pl[k]||k)+'</span>'
+          +'<span style="font-size:11px;color:var(--tx-900);font-weight:700">'+d.cnt+'명 · ₩'+d.rev.toLocaleString()+'</span>'
+          +'</div><div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:'+pct+'%;background:'+(colors[k]||'var(--tx-500)')+'"></div></div></div>';
+      }).join('');
+  }
+  var profitBox=document.getElementById('chart-profit');
+  if(profitBox){
+    var roi=cost>0?(profit/cost*100).toFixed(1):0;
+    var items=[
+      {label:'한국 귀속 매출',v:totalKR,color:'#1a4f8a'},
+      {label:'총 투입 비용',v:cost,color:'var(--tx-300)'},
+      {label:'순이익 (한국)',v:profit,color:profit>=0?'#1a6b3c':'var(--red)'},
+    ];
+    profitBox.innerHTML=items.map(function(it){
+      var pct2=totalKR>0?Math.min(100,Math.round(Math.abs(it.v)/totalKR*100)):0;
+      return '<div><div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+        +'<span style="font-size:11px;color:'+it.color+';font-weight:700">'+it.label+'</span>'
+        +'<span style="font-size:11px;color:var(--tx-900);font-weight:700">'+(it.v>=0?'':'−')+'₩'+Math.abs(it.v).toLocaleString()+'</span>'
+        +'</div><div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:'+pct2+'%;background:'+it.color+'"></div></div></div>';
+    }).join('')
+    +'<div style="margin-top:8px;padding:8px 12px;background:var(--bg-1);border:1px solid var(--bg-3);border-radius:4px;display:flex;justify-content:space-between">'
+    +'<span style="font-size:11px;color:var(--tx-500)">ROI</span>'
+    +'<span style="font-size:14px;font-weight:700;color:'+(profit>=0?'var(--gold)':'var(--red)')+'">'+roi+'%</span></div>';
+  }
+}
+
+// ══════════════════════════════════════════════
+// 핵심 계산
+// ══════════════════════════════════════════════
+function calcRevAmounts(){
+  var totalPay=0,totalKR=0,totalJP=0;
+  Object.values(scheduleData).forEach(function(s){
+    if(!s||!s.name||s.status==='취소') return;
+    var qty=Number(s.qty)||0,unit=Number(s.unit)||0;
+    var dep=(s.dep&&Number(s.dep)>0)?1:0;
+    var ct=s.case==='A'?'A':'B';
+    var base=qty*unit; var pay=base>0?(dep?Math.round(base*.9):base):(Number(s.rev)||0);
+    var kr=ct==='A'?Math.round(pay*.5):pay;
+    var jp=ct==='A'?Math.round(pay*.5):0;
+    totalPay+=pay; totalKR+=kr; totalJP+=jp;
+  });
+  window._simRevKR=totalKR; window._simRevJP=totalJP; window._simRevTotal=totalPay;
+  return {totalPay:totalPay,totalKR:totalKR,totalJP:totalJP};
+}
+
+function calcCost(){
+  var rate=(vn('c-rate')||950)/100;
+  var fixed=vn('c-rent-jpy')*rate+vn('c-rent-krw')+vn('c-mkt')+vn('c-misc')+vn('c-travel');
+  var fsEl=document.getElementById('fixed-sub'); if(fsEl) fsEl.textContent='₩'+Math.round(fixed).toLocaleString();
+  var staff=0;
+  Object.keys(staffData).forEach(function(id){
+    var s=staffData[id];
+    var sub=s.unit==='시급'?(s.rate||0)*(s.count||1)*(s.hours||8):(s.rate||0)*(s.count||1);
+    staff+=sub;
+    var el=document.getElementById('ss-'+id); if(el) el.textContent='₩'+Math.round(sub).toLocaleString();
+  });
+  var ssEl=document.getElementById('staff-sub'); if(ssEl) ssEl.textContent='₩'+Math.round(staff).toLocaleString();
+  return fixed+staff;
+}
+
+function calcRevFromPatients(){ return calcRevAmounts(); }
+
+function calcAll(){
+  var cost=calcCost();
+  var rev=calcRevAmounts();
+  var profit=rev.totalKR-cost, roi=cost>0?profit/cost*100:0;
+  setText('kpi-cost','₩'+Math.round(cost).toLocaleString());
+  setText('kpi-rev','₩'+Math.round(rev.totalPay).toLocaleString());
+  setText('kpi-rev-kr','₩'+Math.round(rev.totalKR).toLocaleString());
+  setText('kpi-rev-jp','₩'+Math.round(rev.totalJP).toLocaleString());
+  setText('kpi-profit','₩'+Math.round(profit).toLocaleString());
+  setText('kpi-roi',roi.toFixed(1)+'%');
+  setText('s-cost','₩'+Math.round(cost).toLocaleString());
+  setText('s-rev-kr','₩'+Math.round(rev.totalKR).toLocaleString());
+  setText('s-rev-jp','₩'+Math.round(rev.totalJP).toLocaleString());
+  var sP=document.getElementById('s-profit');
+  if(sP){sP.textContent='₩'+Math.round(profit).toLocaleString();sP.className='kpi-val '+(profit>=0?'val-pos':'val-neg');}
+  setText('ops-kr-rev','₩'+Math.round(rev.totalKR).toLocaleString());
+  setText('ops-jp-rev','₩'+Math.round(rev.totalJP).toLocaleString());
+  var slots=Object.values(scheduleData).filter(function(s){return s&&s.name&&s.status!=='취소';});
+  setText('ops-pt-cnt',slots.length+'명');
+}
+
+function setText(id,txt){var el=document.getElementById(id);if(el)el.textContent=txt;}
+function vn(id){return parseFloat(document.getElementById(id)?.value)||0;}
+
+// ── 토스트 ─────────────────────────────────────────────────
+function showSaveToast(msg){
+  var t=document.getElementById('toast');if(!t)return;
+  t.style.background=typeof _fbConnected!=='undefined'&&_fbConnected?'var(--green-bg)':'var(--amber-bg)';
+  t.style.borderColor=typeof _fbConnected!=='undefined'&&_fbConnected?'var(--green-bd)':'var(--amber-bd)';
+  t.style.color=typeof _fbConnected!=='undefined'&&_fbConnected?'var(--green)':'var(--amber)';
+  t.textContent=msg||(typeof _fbConnected!=='undefined'&&_fbConnected?'💾 Firestore에 저장됨':'💾 로컬 저장됨');
+  t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2500);
+}
+function showToast(msg){
+  var t=document.getElementById('toast');if(!t)return;
+  if(msg)t.textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2000);
+}
+
+// ── 섹션 토글 ─────────────────────────────────────────────
+function toggleSec(id){
+  var b=document.getElementById('body-'+id),btn=document.getElementById('tog-'+id);
+  if(!b||!btn)return;
+  var c=b.classList.toggle('collapsed'); btn.classList.toggle('collapsed',c); btn.title=c?'펼치기':'숨기기';
+}
+function toggleSecCost(){
+  var b=document.getElementById('body-cost'),btn=document.getElementById('tog-cost');
+  if(!b||!btn)return;
+  var c=b.classList.toggle('collapsed'); btn.classList.toggle('collapsed',c); btn.title=c?'펼치기':'숨기기';
+}
+
+// ── init ─────────────────────────────────────────────────
+function init(){
+  var t=new Date(); var p=function(n){return String(n).padStart(2,'0');};
+  var dateEl=document.getElementById('event-date');
+  if(dateEl) dateEl.value=t.getFullYear()+'-'+p(t.getMonth()+1)+'-'+p(t.getDate());
+  if(typeof SUBS!=='undefined') SUBS.forEach(function(s){if(typeof renderTable==='function')renderTable(s);});
+  if(typeof buildMgrBar==='function') buildMgrBar();
+  var addBtn=document.getElementById('btn-add-mgr');
+  if(addBtn&&typeof addMgrSlot!=='undefined') addBtn.addEventListener('click',addMgrSlot);
+  if(typeof renderSchedule==='function') renderSchedule();
+  if(typeof updateNpPreview==='function') updateNpPreview();
+  if(typeof renderMemos==='function') renderMemos();
+  if(typeof updateInfoBar==='function') updateInfoBar();
+  if(typeof loadDefaultsIfEmpty==='function') loadDefaultsIfEmpty();
+}
+document.addEventListener('DOMContentLoaded', init);
+
+// ── 언어 전환 ────────────────────────────────────────────
+function setLang(lang){
+  if(typeof currentLang!=='undefined') window.currentLang=lang;
+  var lkr=document.getElementById('lang-kr'),ljp=document.getElementById('lang-jp');
+  if(lkr) lkr.classList.toggle('active',lang==='kr');
+  if(ljp) ljp.classList.toggle('active',lang==='jp');
+  var notice=document.getElementById('lang-notice');
+  if(notice) notice.style.display=lang==='jp'?'block':'none';
+  if(typeof setText==='function'){setText('mtab-ops',lang==='kr'?'📋 당일 운영':'📋 当日運営');setText('mtab-stats',lang==='kr'?'📊 매출 통계':'📊 売上統計');}
+  if(typeof updateInfoBar==='function') updateInfoBar();
+}
+
+// ── 정보바 업데이트 ────────────────────────────────────────
+function onLocationChange(){
+  var sel=document.getElementById('event-location');
+  var cw=document.getElementById('event-location-custom-wrap');
+  if(sel&&cw) cw.style.display=sel.value==='custom'?'block':'none';
+  if(typeof updateInfoBar==='function') updateInfoBar();
+  if(typeof fbSaveEventInfo==='function') fbSaveEventInfo();
+}
+function updateInfoBar(){
+  var dateEl=document.getElementById('event-date');
+  var locSel=document.getElementById('event-location');
+  var locCust=document.getElementById('event-location-custom');
+  var infoDate=document.getElementById('info-date');
+  var infoLoc=document.getElementById('info-location');
+  var lang=typeof currentLang!=='undefined'?currentLang:'kr';
+  if(infoDate&&dateEl){
+    var d=dateEl.value;
+    infoDate.textContent=d?new Date(d+'T00:00').toLocaleDateString(lang==='jp'?'ja-JP':'ko-KR',{year:'numeric',month:'long',day:'numeric'}):'—';
+  }
+  if(infoLoc&&locSel){
+    var v=locSel.value;
+    infoLoc.textContent=v==='custom'?(locCust?locCust.value:'—'):(v||'—');
+  }
+}
+
+// ── init & loadDefaults ──
+
+
+
+
+// ══════════════════════════════════════════════
+// 수가표 데이터
+// ══════════════════════════════════════════════
+const QTY = [20,18,16,14,12,10,8,6,4,2];
+const SUBS = ['norm','rnose','rface','qty'];
+const TYPE = {norm:'simple', rnose:'disc', rface:'disc', qty:'disc'};
+
+const tbl = {
+  norm:  {20:{u:2380000},18:{u:2380000},16:{u:2380000},14:{u:2380000},12:{u:2380000},10:{u:2380000},8:{u:2380000},6:{u:2380000},4:{u:2380000},2:{u:2380000}},
+  rnose: {20:{b:2380000,d:12},18:{b:2380000,d:12},16:{b:2380000,d:12},14:{b:2380000,d:8},12:{b:2380000,d:8},10:{b:2380000,d:8},8:{b:2380000,d:4},6:{b:2380000,d:4},4:{b:2380000,d:4},2:{b:2380000,d:0}},
+  rface: {20:{b:2380000,d:34},18:{b:2380000,d:34},16:{b:2380000,d:34},14:{b:2380000,d:30},12:{b:2380000,d:30},10:{b:2380000,d:30},8:{b:2380000,d:27},6:{b:2380000,d:27},4:{b:2380000,d:27},2:{b:2380000,d:0}},
+  qty:   {20:{b:2380000,d:20},18:{b:2380000,d:20},16:{b:2380000,d:20},14:{b:2380000,d:12},12:{b:2380000,d:12},10:{b:2380000,d:12},8:{b:2380000,d:8},6:{b:2380000,d:8},4:{b:2380000,d:8},2:{b:2380000,d:0}},
+};
+
+// discUnit 초기 계산
+['rnose','rface','qty'].forEach(s=>{
+  QTY.forEach(q=>{ const r=tbl[s][q]; r.du=Math.round(r.b*(1-r.d/100)); });
+});
+
+let curSub = 'norm';
+let isEdit  = false;
+
+// ── 서브탭 전환 ──────────────────────────────
+function switchSub(id){
+  if(isEdit){ if(!confirm('수정 중인 내용이 저장되지 않습니다. 이동할까요?')) return; cancelEdit(); }
+  SUBS.forEach(s=>{
+    document.getElementById('sp-'+s).style.display = s===id ? 'block':'none';
+    document.getElementById('st-'+s).classList.toggle('active', s===id);
+  });
+  curSub = id;
+}
+
+function toggleEdit(){
+  isEdit = true;
+  document.getElementById('edit-btn').style.display = 'none';
+  document.getElementById('save-btn').style.display = '';
+  renderCur();
+}
+function cancelEdit(){
+  isEdit = false;
+  document.getElementById('edit-btn').style.display = '';
+  document.getElementById('save-btn').style.display = 'none';
+}
+function saveCurrentTable(){
+  cancelEdit();
+  renderCur();
+  showToast();
+}
+function renderCur(){ renderTable(curSub); }
+
+// ── 테이블 렌더 ──────────────────────────────
+function getTotal(s, q){
+  if(TYPE[s]==='simple') return (tbl[s][q].u||0)*q;
+  return (tbl[s][q].du||0)*q;
+}
+function getUnit(s, q){
+  if(TYPE[s]==='simple') return tbl[s][q].u||0;
+  return tbl[s][q].du||0;
+}
+
+function renderTable(s){
+  const tbody = document.getElementById('tbody-'+s);
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  QTY.forEach(q=>{
+    const r = tbl[s][q]||{};
+    const total = getTotal(s,q);
+    const disc10 = Math.round(total*0.9);
+    const tr = document.createElement('tr');
+
+    if(TYPE[s]==='simple'){
+      const u = r.u||0;
+      if(isEdit && curSub===s){
+        tr.classList.add('em');
+        tr.innerHTML=`
+          <td>${q}개</td>
+          <td><input class="cell-inp" type="number" value="${u}" oninput="onU('${s}',${q},this.value)" style="width:100%"></td>
+          <td><input class="cell-inp ro" type="number" value="${u*q}" readonly style="width:100%"></td>
+          <td style="color:#7a5010;font-weight:700">₩${disc10.toLocaleString()}</td>`;
+      } else {
+        tr.innerHTML=`
+          <td>${q}개</td>
+          <td style="color:var(--tx-900);font-weight:700">₩${u.toLocaleString()}</td>
+          <td style="color:var(--gold);font-weight:700;font-size:13px">₩${(u*q).toLocaleString()}</td>
+          <td style="color:#7a5010;font-weight:700">₩${disc10.toLocaleString()}</td>`;
+        tr.style.cursor='pointer';
+        tr.onclick=()=>{ document.querySelectorAll('.ptbl tr').forEach(r=>{r.classList.remove('sel');r.classList.remove('linked');}); tr.classList.add('sel'); tr.classList.add('linked'); showRB(s,q,u*q,disc10); };
+      }
+    } else {
+      const b=r.b||0, d=r.d||0, du=r.du||Math.round(b*(1-d/100));
+      if(isEdit && curSub===s){
+        tr.classList.add('em');
+        tr.innerHTML=`
+          <td>${q}개</td>
+          <td><input class="cell-inp" type="number" value="${b}" oninput="onB('${s}',${q},this.value)" style="width:100%"></td>
+          <td><input class="cell-inp dv" type="number" value="${d}" step="0.1" oninput="onD('${s}',${q},this.value)" style="width:100%;text-align:center"></td>
+          <td><input class="cell-inp dv" type="number" value="${du}" oninput="onDU('${s}',${q},this.value)" style="width:100%"></td>
+          <td><input class="cell-inp ro" type="number" value="${du*q}" readonly style="width:100%"></td>
+          <td style="color:#7a5010;font-weight:700">₩${disc10.toLocaleString()}</td>`;
+      } else {
+        tr.innerHTML=`
+          <td>${q}개</td>
+          <td style="color:var(--tx-900);font-weight:700">₩${b.toLocaleString()}</td>
+          <td style="color:#1a6b3c;font-weight:700">${d}%</td>
+          <td style="color:#1a6b3c;font-weight:700">₩${du.toLocaleString()}</td>
+          <td style="color:var(--gold);font-weight:700;font-size:13px">₩${(du*q).toLocaleString()}</td>
+          <td style="color:#7a5010;font-weight:700">₩${disc10.toLocaleString()}</td>`;
+        tr.style.cursor='pointer';
+        tr.onclick=()=>{ document.querySelectorAll('.ptbl tr').forEach(r=>{r.classList.remove('sel');r.classList.remove('linked');}); tr.classList.add('sel'); tr.classList.add('linked'); showRB(s,q,du*q,disc10); };
+      }
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+// 현재 결과박스 상태 저장 (예약금 토글 시 재렌더링용)
+let _rbState = null;
+
+function showRB(s, q, total, disc10){
+  _rbState = {s, q, total, disc10};
+  _renderRB();
+  // 폼에 자동 입력
+  applyToSimForm(s, q, Math.round(total/q));
+}
+
+function _renderRB(){
+  if(!_rbState) return;
+  const {s, q, total, disc10} = _rbState;
+  const box = document.getElementById('rb-'+s);
+  if(!box) return;
+  const unit   = Math.round(total/q);
+  const saving = total - disc10;
+  const dep    = parseInt(document.getElementById('np-dep')?.value)||0;
+  const finalAmt = dep ? disc10 : total;
+
+  box.innerHTML=`
+    <div class="res-box" style="position:relative">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;align-items:center">
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500);margin-bottom:4px">선택 갯수 · 단가</div>
+          <div style="font-size:24px;font-weight:700;color:var(--gold)">${q}개</div>
+          <div style="font-size:11px;color:var(--tx-500);margin-top:2px">₩${unit.toLocaleString()} / 개</div>
+        </div>
+        <div style="text-align:center;padding:0 8px;border-left:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.08)">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500);margin-bottom:4px">정가 합계</div>
+          <div style="font-size:20px;font-weight:700;color:var(--tx-900)">₩${total.toLocaleString()}</div>
+        </div>
+        <div style="text-align:center;padding:0 8px;border-right:1px solid rgba(255,255,255,.08)">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500);margin-bottom:4px">🎫 예약금 10% 결제 시</div>
+          <div style="font-size:20px;font-weight:700;color:#7a5010">₩${disc10.toLocaleString()}</div>
+          <div style="font-size:10px;color:#1a6b3c;margin-top:2px">-₩${saving.toLocaleString()}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-500);margin-bottom:4px">현재 선택 결제금액</div>
+          <div style="font-size:22px;font-weight:700;color:${dep?'#7a5010':'var(--gold)'}">₩${finalAmt.toLocaleString()}</div>
+          <div style="font-size:10px;color:${dep?'#7a5010':'var(--tx-500)'};margin-top:2px">${dep?'예약금 10% 결제 시 10% 할인 적용':'정가 적용 중'}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// 수가표 행 클릭 → 시뮬레이션 폼 자동 입력
+function applyToSimForm(s, q, unit){
+  const qEl  = document.getElementById('np-qty');
+  const uEl  = document.getElementById('np-unit');
+  const ptEl = document.getElementById('np-pricetype');
+  if(qEl)  qEl.value  = q;
+  if(uEl)  uEl.value  = unit;
+  if(ptEl) ptEl.value = s;
+
+  // 배지 표시
+  const badge = document.getElementById('np-selected-badge');
+  const btext = document.getElementById('np-badge-text');
+  if(badge && btext){
+    const subLabel = {norm:'정가', rnose:'리뷰할인(코밑)', rface:'리뷰할인(얼굴)', qty:'갯수할인'};
+    btext.textContent = `수가표에서 선택됨 → ${subLabel[s]||s} · ${q}개 · ₩${unit.toLocaleString()}/개`;
+    badge.classList.add('show');
+  }
+  updateNpPreview();
+
+  // 툴바 플래시
+  const toolbar = document.querySelector('#body-03 .np-selected-badge')?.closest('div[style*="background:rgba(201"]');
+  if(toolbar){ toolbar.classList.remove('flash-gold'); void toolbar.offsetWidth; toolbar.classList.add('flash-gold'); }
+}
+
+function clearTableSel(){
+  // 모든 수가표 선택 해제
+  ['norm','rnose','rface','qty'].forEach(s=>{
+    const tb = document.getElementById('tbody-'+s);
+    if(tb) tb.querySelectorAll('tr').forEach(r=>{r.classList.remove('sel'); r.classList.remove('linked');});
+  });
+  const badge = document.getElementById('np-selected-badge');
+  if(badge) badge.classList.remove('show');
+  _rbState = null;
+  ['rb-norm','rb-rnose','rb-rface','rb-qty'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML='';
+  });
+  document.getElementById('np-pricetype').value='custom';
+  updateNpPreview();
+}
+
+// ── 인라인 편집 핸들러 ────────────────────────
+function onU(s,q,v){ tbl[s][q].u=parseFloat(v)||0; syncROInput(s,q); }
+function onB(s,q,v){ tbl[s][q].b=parseFloat(v)||0; recalcDisc(s,q); }
+function onD(s,q,v){ tbl[s][q].d=Math.min(100,Math.max(0,parseFloat(v)||0)); recalcDisc(s,q); }
+function onDU(s,q,v){
+  const du=parseFloat(v)||0, b=tbl[s][q].b||0;
+  tbl[s][q].du=du;
+  tbl[s][q].d=b>0?Math.round((1-du/b)*1000)/10:0;
+  syncDiscInputs(s,q);
+}
+function recalcDisc(s,q){
+  const r=tbl[s][q]; r.du=Math.round((r.b||0)*(1-(r.d||0)/100));
+  syncDiscInputs(s,q);
+}
+function syncDiscInputs(s,q){
+  const tbody=document.getElementById('tbody-'+s);
+  if(!tbody) return;
+  const idx=QTY.indexOf(q); if(idx<0) return;
+  const row=tbody.querySelectorAll('tr')[idx]; if(!row) return;
+  const inps=row.querySelectorAll('input');
+  const r=tbl[s][q];
+  if(inps[1]) inps[1].value=r.d;
+  if(inps[2]) inps[2].value=r.du;
+  if(inps[3]) inps[3].value=(r.du||0)*q;
+}
+function syncROInput(s,q){
+  const tbody=document.getElementById('tbody-'+s);
+  if(!tbody) return;
+  const idx=QTY.indexOf(q); if(idx<0) return;
+  const row=tbody.querySelectorAll('tr')[idx]; if(!row) return;
+  const ro=row.querySelector('input[readonly]');
+  if(ro) ro.value=(tbl[s][q].u||0)*q;
+}
+
+// ── 탭 전환 (서브탭) ─────────────────────────
+function switchSub(id){
+  if(isEdit){ if(!confirm('수정 중인 내용이 저장되지 않습니다. 이동할까요?')) return; cancelEdit(); }
+  SUBS.forEach(s=>{
+    document.getElementById('sp-'+s).style.display = s===id?'block':'none';
+    document.getElementById('st-'+s).classList.toggle('active', s===id);
+  });
+  curSub = id;
+}
+
+// ══════════════════════════════════════════════
+// 매출 시뮬레이션
+// ══════════════════════════════════════════════
+function vn(id){ return parseFloat(document.getElementById(id)?.value)||0; }
+
+
+
+
+
+// ══════════════════════════════════════════════
+// 스케줄러
+// ══════════════════════════════════════════════
+const scheduleData={};
+let curSlot=null;
+// ══════════════════════════════════════════════
+// 스케줄러: 30분 단위, 09:00~21:00, 실장 자유 지정
+// ══════════════════════════════════════════════
+
+// 타임 슬롯 생성 (09:00 ~ 21:00, 30분 단위)
+const SLOTS = [];
+for (var _h = 9; _h <= 20; _h++) {
+  SLOTS.push((_h < 10 ? '0' : '') + _h + ':00');
+  SLOTS.push((_h < 10 ? '0' : '') + _h + ':30');
+}
+SLOTS.push('21:00');
+
+// 실장 데이터
+var mgrs = [
+  {id: 'M0', name: '실장 A', colorIdx: 0},
+  {id: 'M1', name: '실장 B', colorIdx: 1},
+];
+var mgrNextId = 2;
+
+// 슬롯별 담당 실장 배정: {'09:00': ['M0','M1'], '09:30': ['M0','M1'], ...}
+// 미지정 슬롯은 전체 실장이 모두 담당
+var slotMgrs = {};
+
+function getMgrById(id) {
+  return mgrs.find(function(m){return m.id===id;}) || {id:id,name:id,colorIdx:0};
+}
+
+// ── 실장 관리 ──────────────────────────────────
+// 실장 이름 저장 debounce 타이머
+var _mgrSaveTimer = null;
+
+function buildMgrBar() {
+  var wrap = document.getElementById('mgr-inputs');
+  if (!wrap) return;
+
+  // ── 이미 렌더된 항목은 재사용, 새 항목만 추가, 삭제된 항목만 제거 ──
+  // data-mgr-id 속성으로 기존 DOM과 mgrs 배열을 매칭
+  var existing = {};
+  Array.from(wrap.children).forEach(function(el) {
+    var id = el.getAttribute('data-mgr-id');
+    if (id) existing[id] = el;
+  });
+
+  // 현재 mgrs 기준으로 순서 재배치
+  mgrs.forEach(function(m, idx) {
+    var item = existing[m.id];
+
+    if (!item) {
+      // 새 실장 → DOM 생성
+      item = document.createElement('div');
+      item.setAttribute('data-mgr-id', m.id);
+      item.style.cssText = 'display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:3px 6px';
+
+      var badge = document.createElement('span');
+      badge.className = 'mgr-name-badge mc' + m.colorIdx;
+      badge.textContent = m.name;
+      badge.setAttribute('data-badge', '1');
+
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'inp';
+      inp.value = m.name;
+      inp.placeholder = '실장 이름';
+      inp.style.cssText = 'width:80px;font-size:11px;height:26px;padding:2px 6px';
+      inp.setAttribute('data-inp', '1');
+
+      (function(mId, b) {
+        inp.addEventListener('input', function() {
+          var mg = getMgrById(mId);
+          if (mg) { mg.name = this.value; b.textContent = this.value; }
+          // renderSchedule은 debounce로 실행 (포커스 유지)
+          clearTimeout(_mgrSaveTimer);
+          _mgrSaveTimer = setTimeout(function() {
+            renderSchedule();
+            if (_fbConnected) fbSaveSettings();
+          }, 600);
+        });
+      })(m.id, badge);
+
+      item.appendChild(badge);
+      item.appendChild(inp);
+
+      // 삭제 버튼 자리 (나중에 갱신)
+      var delWrap = document.createElement('span');
+      delWrap.setAttribute('data-del', '1');
+      item.appendChild(delWrap);
+
+      wrap.appendChild(item);
+    } else {
+      // 기존 항목 → 값만 업데이트 (포커스 건드리지 않음)
+      var b = item.querySelector('[data-badge]');
+      var inp2 = item.querySelector('[data-inp]');
+      if (b && b.textContent !== m.name) b.textContent = m.name;
+      // input은 포커스 중이면 건드리지 않음
+      if (inp2 && document.activeElement !== inp2 && inp2.value !== m.name) {
+        inp2.value = m.name;
+      }
+    }
+
+    // 삭제 버튼 갱신
+    var delWrap2 = item.querySelector('[data-del]');
+    if (delWrap2) {
+      delWrap2.innerHTML = '';
+      if (mgrs.length > 1) {
+        var del = document.createElement('button');
+        del.textContent = '×';
+        del.title = '실장 삭제';
+        del.style.cssText = 'background:none;border:none;color:var(--tx-500);cursor:pointer;font-size:15px;padding:0 2px;line-height:1;margin-left:2px';
+        (function(mId){ del.addEventListener('click', function(){ removeMgr(mId); }); })(m.id);
+        delWrap2.appendChild(del);
+      }
+    }
+
+    // 순서 맞추기
+    if (wrap.children[idx] !== item) wrap.insertBefore(item, wrap.children[idx] || null);
+  });
+
+  // 삭제된 실장 항목 제거
+  var validIds = mgrs.map(function(m){ return m.id; });
+  Array.from(wrap.children).forEach(function(el) {
+    if (validIds.indexOf(el.getAttribute('data-mgr-id')) < 0) wrap.removeChild(el);
+  });
+}
+
+function addMgrSlot() {
+  var idx = mgrs.length % 6;
+  var id = 'M' + (mgrNextId++);
+  mgrs.push({id: id, name: '실장 ' + String.fromCharCode(65 + mgrs.length), colorIdx: idx});
+  buildMgrBar();
+  renderSchedule();
+  fbSaveSettings();
+}
+
+function removeMgr(id) {
+  if (mgrs.length <= 1) return;
+  mgrs = mgrs.filter(function(m){ return m.id !== id; });
+  // 해당 실장이 배정된 슬롯에서도 제거
+  Object.keys(slotMgrs).forEach(function(t) {
+    slotMgrs[t] = slotMgrs[t].filter(function(mid){ return mid !== id; });
+    if (slotMgrs[t].length === 0) delete slotMgrs[t];
+  });
+  buildMgrBar();
+  renderSchedule();
+  fbSaveSettings();
+}
+
+// 슬롯별 담당 실장 변경
+function changeSlotMgr(time, rowIdx, newMgrId) {
+  if (!slotMgrs[time]) {
+    slotMgrs[time] = mgrs.map(function(m){ return m.id; });
+  }
+  slotMgrs[time][rowIdx] = newMgrId;
+  renderSchedule();
+  fbSaveSettings();
+}
+
+// ── 타임테이블 렌더 ────────────────────────────
+function renderSchedule() {
+  var body = document.getElementById('schedule-body');
+  if (!body) return;
+  body.innerHTML = '';
+
+  var statusClass = {
+    '확정':'sbadge sb-ok','대기':'sbadge sb-wt','문의':'sbadge sb-qi','취소':'sbadge sb-cx',
+    '결제완료':'sbadge sb-paid','미결제':'sbadge sb-unpaid','노쇼':'sbadge sb-noshow'
+  };
+  var statusText = {
+    '확정':'✅ 확정','대기':'⏳ 대기','문의':'💬 문의','취소':'❌ 취소',
+    '결제완료':'💳 결제완료','미결제':'🔴 미결제','노쇼':'🚫 노쇼'
+  };
+
+  SLOTS.forEach(function(time) {
+    var isHour = time.endsWith(':00');
+    // 이 슬롯에 배정된 실장 목록
+    var rowMgrs = slotMgrs[time] ? slotMgrs[time] : mgrs.map(function(m){ return m.id; });
+    // 유효한 실장만 필터 (삭제된 id 제거)
+    var validIds = mgrs.map(function(m){ return m.id; });
+    rowMgrs = rowMgrs.filter(function(id){ return validIds.indexOf(id) >= 0; });
+    if (rowMgrs.length === 0) rowMgrs = [mgrs[0].id];
+
+    rowMgrs.forEach(function(mId, rowIdx) {
+      var slotKey = time + '|' + mId;
+      var slot = scheduleData[slotKey] || null;
+      var mgr = getMgrById(mId);
+
+      // ── 행 생성 ──────────────────────────────
+      var row = document.createElement('div');
+      row.className = 'sch-row sch-cols'
+        + (rowIdx === 0 ? (isHour ? ' hr-on' : ' hr-half') : '')
+        + (slot ? ' booked' : '');
+
+      // 셀 생성 헬퍼
+      function cell(content, extraStyle) {
+        var d = document.createElement('div');
+        d.className = 'sch-cell';
+        if (extraStyle) d.style.cssText = extraStyle;
+        if (typeof content === 'string') d.innerHTML = content;
+        else if (content) d.appendChild(content);
+        return d;
+      }
+      function cellEl(el, extraStyle) {
+        var d = document.createElement('div');
+        d.className = 'sch-cell';
+        if (extraStyle) d.style.cssText = extraStyle;
+        d.appendChild(el);
+        return d;
+      }
+
+      // 1) 시간 셀
+      var timeSpan = document.createElement('span');
+      if (rowIdx === 0) {
+        timeSpan.className = 'time-lbl' + (isHour ? '' : ' half');
+        timeSpan.textContent = time;
+      } else {
+        timeSpan.style.cssText = 'font-size:9px;color:var(--tx-300)';
+        timeSpan.textContent = '│';
+      }
+      row.appendChild(cellEl(timeSpan));
+
+      // 2) 담당 실장 셀 (배지 + select)
+      var mgrWrap = document.createElement('div');
+      mgrWrap.style.cssText = 'display:flex;flex-direction:column;gap:3px;width:100%';
+      var nameBadge = document.createElement('span');
+      nameBadge.className = 'mgr-name-badge mc' + mgr.colorIdx;
+      nameBadge.textContent = mgr.name;
+      // 담당 실장 변경 select
+      var sel = document.createElement('select');
+      sel.style.cssText = 'background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);color:var(--tx-700);font-size:10px;padding:2px 4px;border-radius:2px;font-family:"Malgun Gothic",sans-serif;cursor:pointer;width:140px;margin-top:1px';
+      mgrs.forEach(function(mg) {
+        var opt = document.createElement('option');
+        opt.value = mg.id; opt.textContent = mg.name;
+        if (mg.id === mId) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      (function(t, ri) {
+        sel.addEventListener('change', function() { changeSlotMgr(t, ri, this.value); });
+      })(time, rowIdx);
+      mgrWrap.appendChild(nameBadge);
+      mgrWrap.appendChild(sel);
+      row.appendChild(cellEl(mgrWrap, 'flex-direction:column;align-items:flex-start;gap:2px'));
+
+      // 3) 환자명 셀
+      var c3 = document.createElement('div');
+      c3.className = 'sch-cell';
+      c3.style.cssText = 'flex-direction:column;align-items:flex-start;gap:3px';
+      if (slot && slot.name) {
+        var nSp = document.createElement('span');
+        nSp.style.cssText = 'font-size:12px;font-weight:700;color:var(--tx-900)';
+        nSp.textContent = slot.name;
+        c3.appendChild(nSp);
+        // 케이스·예약금 배지
+        var badges = document.createElement('div');
+        badges.style.cssText = 'display:flex;gap:3px;flex-wrap:wrap';
+        if (slot.case) {
+          var cb = document.createElement('span');
+          cb.style.cssText = 'font-size:9px;padding:1px 5px;border-radius:2px;white-space:nowrap;'
+            + (slot.case==='A' ? 'background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)'
+                              : 'background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)');
+          cb.textContent = slot.case; badges.appendChild(cb);
+        }
+        if (slot.dep) {
+          var db = document.createElement('span');
+          db.style.cssText = 'font-size:9px;background:rgba(253,230,138,.12);color:#7a5010;border:1px solid rgba(253,230,138,.26);padding:1px 4px;border-radius:2px';
+          db.textContent = '🎫'; badges.appendChild(db);
+        }
+        c3.appendChild(badges);
+      } else {
+        var regBtn = document.createElement('button');
+        regBtn.style.cssText = 'background:none;border:1px dashed rgba(201,168,76,.2);color:var(--tx-500);font-size:10px;padding:3px 8px;cursor:pointer;border-radius:2px;font-family:"Malgun Gothic",sans-serif;white-space:nowrap';
+        regBtn.textContent = '+ 등록';
+        (function(k){ regBtn.addEventListener('click', function(){ openModal(k); }); })(slotKey);
+        c3.appendChild(regBtn);
+      }
+      row.appendChild(c3);
+
+      // 4) 상태 셀
+      var c4 = document.createElement('div'); c4.className = 'sch-cell';
+      if (slot && slot.status) {
+        var stBadge = document.createElement('span');
+        stBadge.className = statusClass[slot.status] || 'sbadge sb-ok';
+        stBadge.textContent = statusText[slot.status] || slot.status;
+        c4.appendChild(stBadge);
+      }
+      row.appendChild(c4);
+
+      // 5) 시술 항목 셀
+      var c5 = document.createElement('div'); c5.className = 'sch-cell';
+      c5.style.cssText = 'flex-direction:column;align-items:flex-start;gap:2px';
+      if (slot) {
+        var procSp = document.createElement('span');
+        procSp.style.cssText = 'font-size:11px;color:var(--tx-700)';
+        procSp.textContent = slot.proc || '—';
+        c5.appendChild(procSp);
+        if (slot.unit > 0) {
+          var unitSp = document.createElement('span');
+          unitSp.style.cssText = 'font-size:10px;color:var(--tx-500)';
+          unitSp.textContent = '₩' + Number(slot.unit).toLocaleString() + '/개';
+          c5.appendChild(unitSp);
+        }
+      }
+      row.appendChild(c5);
+
+      // 6) 수량 셀
+      var c6 = document.createElement('div'); c6.className = 'sch-cell';
+      if (slot && slot.qty > 0) {
+        var qSp = document.createElement('span');
+        qSp.style.cssText = 'font-size:13px;font-weight:700;color:var(--gold)';
+        qSp.textContent = slot.qty + '개';
+        c6.appendChild(qSp);
+      }
+      row.appendChild(c6);
+
+      // 7) 예약금 셀
+      var c7 = document.createElement('div'); c7.className = 'sch-cell';
+      if (slot && slot.dep) {
+        var dSp = document.createElement('span');
+        dSp.style.cssText = 'font-size:10px;font-weight:700;color:#7a5010';
+        dSp.textContent = '🎫 결제';
+        c7.appendChild(dSp);
+      }
+      row.appendChild(c7);
+
+      // 8) 예상 매출 셀
+      var c8 = document.createElement('div'); c8.className = 'sch-cell';
+      if (slot && slot.rev > 0) {
+        var rSp = document.createElement('span');
+        rSp.style.cssText = 'font-size:11px;font-weight:700;color:var(--gold)';
+        rSp.textContent = '₩' + Number(slot.rev).toLocaleString();
+        c8.appendChild(rSp);
+      }
+      row.appendChild(c8);
+
+      // 9) 메모 셀 (전체 표시)
+      var c9 = document.createElement('div'); c9.className = 'sch-cell';
+      c9.style.cssText = 'align-items:flex-start;padding:6px 8px';
+      var memoSp = document.createElement('span');
+      memoSp.className = 'memo-cell-full';
+      memoSp.textContent = (slot && slot.memo) ? slot.memo : '';
+      c9.appendChild(memoSp);
+      row.appendChild(c9);
+
+      // 10) 관리 버튼 셀
+      var c10 = document.createElement('div'); c10.className = 'sch-cell';
+      c10.style.cssText = 'flex-direction:column;align-items:center;gap:3px;padding:4px 6px';
+
+      if (slot) {
+        // 수정 버튼
+        var editBtn = document.createElement('button');
+        editBtn.className = 'btn-sm';
+        editBtn.textContent = '수정';
+        editBtn.style.cssText = 'width:100%;font-size:10px';
+        (function(k){ editBtn.addEventListener('click', function(){ openModal(k, true); }); })(slotKey);
+        c10.appendChild(editBtn);
+
+        // 빠른 상태 버튼들
+        var quickWrap = document.createElement('div');
+        quickWrap.style.cssText = 'display:flex;flex-direction:column;gap:2px;width:100%';
+
+        var quickBtns = [
+          {label:'💳결제', status:'결제완료', bg:'var(--green-bg)', color:'var(--green)', bd:'var(--green-bd)'},
+          {label:'🔴미결제', status:'미결제', bg:'var(--red-bg)', color:'var(--red)', bd:'var(--red-bd)'},
+          {label:'🚫노쇼', status:'노쇼', bg:'#f3e8ff', color:'#6b21a8', bd:'#d8b4fe'},
+        ];
+
+        quickBtns.forEach(function(qb){
+          var qBtn = document.createElement('button');
+          var isCurrent = slot.status === qb.status;
+          qBtn.style.cssText = 'width:100%;font-size:9px;font-weight:700;padding:2px 4px;'
+            + 'background:' + (isCurrent ? qb.bg : 'transparent') + ';'
+            + 'color:' + (isCurrent ? qb.color : 'var(--tx-300)') + ';'
+            + 'border:1px solid ' + (isCurrent ? qb.bd : 'var(--bg-3)') + ';'
+            + 'border-radius:3px;cursor:pointer;font-family:"Malgun Gothic",sans-serif;'
+            + 'white-space:nowrap;transition:all .15s';
+          qBtn.textContent = qb.label;
+          qBtn.title = qb.status + '로 변경';
+          (function(k, st, b){ 
+            qBtn.addEventListener('click', function(e){
+              e.stopPropagation();
+              quickSetStatus(k, st);
+            });
+          })(slotKey, qb.status, qb);
+          quickWrap.appendChild(qBtn);
+        });
+
+        c10.appendChild(quickWrap);
+      } else {
+        var regBtn2 = document.createElement('button');
+        regBtn2.className = 'btn-sm';
+        regBtn2.textContent = '등록'; regBtn2.style.opacity = '0.4';
+        (function(k){ regBtn2.addEventListener('click', function(){ openModal(k); }); })(slotKey);
+        c10.appendChild(regBtn2);
+      }
+      row.appendChild(c10);
+
+      body.appendChild(row);
+    });
+  });
+  updateSch();
+}
+
+
+// 빠른 상태 변경 (행 우측 버튼)
+function quickSetStatus(slotKey, newStatus){
+  if(!scheduleData[slotKey]) return;
+  scheduleData[slotKey].status = newStatus;
+  // dep 자동 설정: 결제완료 → dep=1, 미결제 → dep=0
+  if(newStatus==='결제완료') scheduleData[slotKey].dep = 1;
+  if(newStatus==='미결제')   scheduleData[slotKey].dep = 0;
+  renderSchedule();
+  syncSchToPatients();
+  renderStatIfOpen();
+  // Firebase 저장
+  if(typeof fbSaveSlot==='function') fbSaveSlot(slotKey, scheduleData[slotKey], true);
+  showToast(newStatus+'로 변경되었습니다');
+}
+
+function updateSch(){
+  let cnt=0,films=0,rev=0;
+  Object.values(scheduleData).forEach(s=>{
+    if(!s||s.status==='취소') return;
+    if(s.name) cnt++;
+    films+=Number(s.qty)||0;
+    rev+=Number(s.rev)||0;
+  });
+  setText('sch-count', cnt+'명');
+  setText('sch-films',  films+'개');
+  setText('sch-rev',    '₩'+rev.toLocaleString());
+  // 01번 정보바 동기화
+  setText('info-pt-cnt', cnt+'명');
+  setText('info-films',  films+'개');
+  calcAll();
+}
+
+function changeMQty(d){
+  let q=parseInt(document.getElementById('m-qty').value)||0;
+  q=Math.max(0,q+d);
+  document.getElementById('m-qty').value=q;
+  document.getElementById('m-qty-d').textContent=q;
+  // 수가 구분이 선택된 경우 단가 자동 재조회
+  const pt=document.getElementById('m-pricetype')?.value||'custom';
+  if(pt!=='custom'){
+    const u=getUnitFromTable(pt,q);
+    if(u!==null) document.getElementById('m-unit').value=u;
+  }
+  calcModalPreview();
+}
+function openModal(key,isEdit=false){
+  curSlot=key;
+  // key = "09:30|M0" 형태
+  var sep=key.indexOf('|');
+  var time = sep>=0 ? key.substring(0,sep) : key;
+  var mId  = sep>=0 ? key.substring(sep+1) : 'M0';
+  var mgr  = getMgrById(mId);
+  document.getElementById('modal-lbl').textContent=time+' — '+(mgr?mgr.name:mId)+' 담당';
+  const s=scheduleData[key]||{};
+  document.getElementById('m-name').value=s.name||'';
+  document.getElementById('m-status').value=s.status||'확정';
+  document.getElementById('m-proc').value=s.proc||'';
+  // 시술항목 select 초기화
+  const procTypeEl=document.getElementById('m-proc-type');
+  if(procTypeEl){
+    const procVal=s.proc||'';
+    if(procVal==='블랙필름(베니어)'||procVal==='블랙필름(크라운)') procTypeEl.value=procVal;
+    else if(procVal) procTypeEl.value='custom';
+    else procTypeEl.value='';
+  }
+  document.getElementById('m-case').value=s.case||'B';
+  document.getElementById('m-qty').value=s.qty||0;
+  document.getElementById('m-qty-d').textContent=s.qty||0;
+  // 수가 구분 / 단가
+  const mPt=document.getElementById('m-pricetype');
+  const mUn=document.getElementById('m-unit');
+  if(mPt) mPt.value=s.priceType||'custom';
+  if(mUn) mUn.value=s.unit||0;
+  // 예약금 토글
+  const depVal=s.dep||0;
+  document.getElementById('m-dep').value=depVal;
+  setMDep(depVal, true); // silent=true
+  document.getElementById('m-rev').value=s.rev||0;
+  document.getElementById('m-memo').value=s.memo||'';
+  document.getElementById('m-del').style.display=isEdit?'block':'none';
+  closeModalPricePopup(); // 팝업 초기화
+  calcModalPreview();
+  document.getElementById('slot-modal').classList.add('active');
+}
+function closeModal(){ document.getElementById('slot-modal').classList.remove('active'); curSlot=null; }
+function saveSlot(){
+  if(!curSlot) return;
+  const qty  = parseInt(document.getElementById('m-qty').value)||0;
+  const dep  = parseInt(document.getElementById('m-dep').value)||0;
+  const unit = parseFloat(document.getElementById('m-unit')?.value)||0;
+  const pt   = document.getElementById('m-pricetype')?.value||'custom';
+  const caseType = document.getElementById('m-case').value||'B';
+  // 예상 매출 자동 계산 (rev 입력 없으면 단가×수량 기준)
+  let rev = parseFloat(document.getElementById('m-rev').value)||0;
+  if(rev===0 && unit>0 && qty>0){
+    rev = dep ? Math.round(unit*qty*0.9) : unit*qty;
+  }
+  // depAmt: 예약금 결제 여부 (1=결제, 0=미결제) — 합계 표시용 제거됨
+  const depAmt = dep; // 0 또는 1
+  scheduleData[curSlot]={
+    name:document.getElementById('m-name').value,
+    status:document.getElementById('m-status').value,
+    proc:document.getElementById('m-proc').value,
+    case:caseType,
+    qty, dep, depAmt, unit, priceType:pt, rev,
+    memo:document.getElementById('m-memo').value,
+    fromSch:true,
+    slotKey:curSlot,
+  };
+  closeModal();
+  renderSchedule();
+  syncSchToPatients(); // 스케줄러 → 매출상세 동기화
+}
+function deleteSlot(){
+  if(!curSlot) return;
+  delete scheduleData[curSlot];
+  closeModal();
+  renderSchedule();
+  syncSchToPatients();
+}
+
+// 스케줄러 데이터 → 매출 상세 patients 자동 동기화
+// scheduleData → 매출상세 직접 렌더 (patients 배열 우회)
+function syncSchToPatients(){
+  renderSchRevDetail(); // 스케줄 기반 매출 상세 렌더
+  calcAll();
+  renderStatIfOpen();
+}
+
+// scheduleData에서 직접 매출 상세 계산·렌더
+function renderSchRevDetail(){
+  const slots = Object.values(scheduleData).filter(s=>s && s.name && s.status!=='취소');
+
+  let totalPay=0, totalKR=0, totalJP=0;
+  const rows = slots.map((s,idx)=>{
+    const qty  = Number(s.qty)||0;
+    const unit = Number(s.unit)||0;
+    const dep  = (s.dep && Number(s.dep)>0) ? 1 : 0;
+    const caseType = s.case==='A' ? 'A' : 'B';
+    const base = qty * unit;
+    const pay  = dep ? Math.round(base*0.9) : base;
+    const kr   = caseType==='A' ? Math.round(pay*0.5) : pay;
+    const jp   = caseType==='A' ? Math.round(pay*0.5) : 0;
+    // rev가 있으면 우선 사용 (단가 없는 경우)
+    const revPay  = (pay>0) ? pay : (Number(s.rev)||0);
+    const revKR   = (pay>0) ? kr  : (caseType==='A' ? Math.round(revPay*0.5) : revPay);
+    const revJP   = (pay>0) ? jp  : (caseType==='A' ? Math.round(revPay*0.5) : 0);
+    totalPay += revPay; totalKR += revKR; totalJP += revJP;
+    return {s, idx, qty, unit, dep, caseType, revPay, revKR, revJP};
+  });
+
+  // 전역 매출 값 갱신 (calcAll에서 사용)
+  window._simRevKR    = totalKR;
+  window._simRevJP    = totalJP;
+  window._simRevTotal = totalPay;
+
+  // patient-tbody (운영탭)
+  const tb1 = document.getElementById('patient-tbody');
+  if(tb1) _renderRevTable(tb1, rows, totalPay, totalKR, totalJP, 'sim');
+  // patient-tbody2 (통계탭)
+  const tb2 = document.getElementById('patient-tbody2');
+  if(tb2) _renderRevTable(tb2, rows, totalPay, totalKR, totalJP, 's');
+
+  // 운영탭 요약
+  setText('ops-pt-cnt',  slots.length+'명');
+  setText('ops-kr-rev',  '₩'+totalKR.toLocaleString());
+  setText('ops-jp-rev',  '₩'+totalJP.toLocaleString());
+  // 통계탭 KPI
+  setText('s-cnt',      slots.length+'명');
+  setText('s-sum-pay',  '₩'+totalPay.toLocaleString());
+  setText('s-sum-kr',   '₩'+totalKR.toLocaleString());
+  setText('s-sum-jp',   '₩'+totalJP.toLocaleString());
+  setText('s-total-pay','₩'+totalPay.toLocaleString());
+  setText('s-total-kr', '₩'+totalKR.toLocaleString());
+  setText('s-total-jp', '₩'+totalJP.toLocaleString());
+  // B섹션 카드
+  setText('b-total-rev','₩'+totalPay.toLocaleString());
+  setText('b-kr-rev',   '₩'+totalKR.toLocaleString());
+  setText('b-jp-rev',   '₩'+totalJP.toLocaleString());
+}
+
+function _renderRevTable(tbody, rows, totalPay, totalKR, totalJP, pfx){
+  tbody.innerHTML='';
+  if(rows.length===0){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td colspan="11" style="padding:20px;text-align:center;color:var(--tx-300);font-size:12px">스케줄러에 등록된 환자가 없습니다</td>`;
+    tbody.appendChild(tr);
+  } else {
+    rows.forEach(function(r){
+      const {s,idx,qty,unit,dep,caseType,revPay,revKR,revJP}=r;
+      const caseColor = caseType==='A'?'#1a4f8a':'#1a6b3c';
+      const caseBg    = caseType==='A'?'#e8f0f8':'#e8f5ee';
+      const caseBd    = caseType==='A'?'#a8c4dc':'#a8d5b8';
+      const tr=document.createElement('tr');
+      tr.style.cssText='border-bottom:1px solid var(--bg-2)';
+      tr.onmouseenter=function(){tr.style.background='var(--bg-1)'};
+      tr.onmouseleave=function(){tr.style.background=''};
+      const ptLabel = PRICE_LABEL[s.priceType]||'직접입력';
+      const depBadge= dep
+        ?'<span style="font-size:10px;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd);padding:1px 6px;border-radius:3px">10%↓</span>'
+        :'<span style="font-size:10px;color:var(--tx-300)">—</span>';
+      const caseBadge=`<span style="font-size:10px;background:${caseBg};color:${caseColor};border:1px solid ${caseBd};padding:1px 6px;border-radius:3px">${CASE_LABEL[caseType]}</span>`;
+      tr.innerHTML=`
+        <td style="padding:7px 10px;text-align:center;color:var(--tx-300);font-size:11px;border-right:1px solid var(--bg-2)">${idx+1}</td>
+        <td style="padding:7px 10px;font-weight:700;color:var(--tx-900);border-right:1px solid var(--bg-2)">${s.name||'—'}</td>
+        <td style="padding:7px 10px;text-align:center;color:var(--gold);font-weight:700;border-right:1px solid var(--bg-2)">${qty>0?qty+'개':'—'}</td>
+        <td style="padding:7px 10px;text-align:right;color:var(--tx-700);border-right:1px solid var(--bg-2)">${unit>0?'₩'+unit.toLocaleString():'—'}</td>
+        <td style="padding:7px 10px;text-align:center;border-right:1px solid var(--bg-2)"><span style="font-size:10px;background:var(--gold-pale);color:var(--gold-dim);border:1px solid var(--gold-bright);padding:1px 6px;border-radius:3px">${ptLabel}</span></td>
+        <td style="padding:7px 10px;text-align:center;border-right:1px solid var(--bg-2)">${depBadge}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:700;color:var(--tx-900);border-right:1px solid var(--bg-2)">₩${revPay.toLocaleString()}</td>
+        <td style="padding:7px 10px;text-align:center;border-right:1px solid var(--bg-2)">${caseBadge}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:700;color:#1a4f8a;border-right:1px solid var(--bg-2)">₩${revKR.toLocaleString()}</td>
+        <td style="padding:7px 10px;text-align:right;font-weight:700;color:#1a6b3c;border-right:1px solid var(--bg-2)">₩${revJP.toLocaleString()}</td>
+        <td style="padding:7px 10px;text-align:center"><span style="font-size:10px;color:var(--tx-300)">[스케줄]</span></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  // tfoot 접두사별 업데이트
+  [`${pfx}-total-pay`,`${pfx}-total-kr`,`${pfx}-total-jp`].forEach(function(id,i){
+    const el=document.getElementById(id);
+    if(el) el.textContent='₩'+[totalPay,totalKR,totalJP][i].toLocaleString();
+  });
+}
+
+// ══════════════════════════════════════════════
+// 인건비
+// ══════════════════════════════════════════════
+let staffCnt=0;
+const staffData={};
+
+function addStaff(role='',rate=0,unit='일당',count=1,hours=8){
+  staffCnt++;
+  const id=staffCnt;
+  staffData[id]={role,rate,unit,count,hours};
+  const list=document.getElementById('staff-list');
+  const div=document.createElement('div');
+  div.style.cssText='display:grid;grid-template-columns:1fr 90px 58px 52px 58px 78px 22px;gap:4px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)';
+  div.id='sr-'+id;
+  div.innerHTML=`
+    <input type="text" class="inp" placeholder="직종/성명" value="${role}" oninput="staffData[${id}].role=this.value" style="font-size:11px;padding:5px 7px">
+    <input type="number" class="inp" placeholder="0" value="${rate}" oninput="staffData[${id}].rate=Number(this.value);calcAll()" style="font-size:11px;padding:5px 7px;text-align:right">
+    <select class="inp" oninput="staffData[${id}].unit=this.value;calcAll();toggleH(${id})" style="font-size:11px;padding:5px 4px">
+      <option ${unit==='시급'?'selected':''}>시급</option>
+      <option ${unit==='일당'?'selected':''}>일당</option>
+    </select>
+    <input type="number" class="inp" placeholder="1" value="${count}" min="1" oninput="staffData[${id}].count=Number(this.value);calcAll()" style="font-size:11px;padding:5px 7px;text-align:center">
+    <input type="number" class="inp" id="h-${id}" placeholder="8" value="${hours}" min="1" max="24" oninput="staffData[${id}].hours=Number(this.value);calcAll()" style="font-size:11px;padding:5px 7px;text-align:center;${unit==='일당'?'opacity:.28;pointer-events:none':''}">
+    <div style="display:flex;align-items:center;justify-content:flex-end"><span id="ss-${id}" style="font-size:11px;font-weight:700;color:var(--gold)">₩0</span></div>
+    <button onclick="removeStaff(${id})" style="background:none;border:none;color:var(--tx-500);cursor:pointer;font-size:16px;padding:0;line-height:1">×</button>`;
+  list.appendChild(div);
+  calcAll();
+}
+function toggleH(id){
+  const d=staffData[id].unit==='일당';
+  const el=document.getElementById('h-'+id);
+  if(el){el.style.opacity=d?'.28':'1';el.style.pointerEvents=d?'none':'auto';}
+}
+function removeStaff(id){ delete staffData[id]; const el=document.getElementById('sr-'+id); if(el) el.remove(); calcAll(); }
+
+// ══════════════════════════════════════════════
+// 매출 시뮬레이션 — 환자별 목록 방식
+// ══════════════════════════════════════════════
+let patients = [];   // [{name, qty, unit, priceType, dep, caseType}]
+let patientIdCnt = 0;
+
+const PRICE_LABEL = {
+  custom:'직접입력', norm:'정가', rnose:'리뷰(코밑)', rface:'리뷰(얼굴)', qty:'갯수할인'
+};
+const CASE_LABEL = {
+  A:'케이스 A (50%)', B:'케이스 B (100%)'
+};
+
+// 수가표에서 갯수에 맞는 단가 자동 조회
+function getUnitFromTable(priceType, qty){
+  if(priceType==='custom') return null;
+  if(priceType==='norm'){
+    // 정가: 가장 가까운 갯수 행 단가
+    const r = tbl.norm[qty] || tbl.norm[2];
+    return r ? r.u : 0;
+  }
+  const t = tbl[priceType];
+  if(!t) return null;
+  // 가장 가까운 갯수 찾기
+  const closest = [20,18,16,14,12,10,8,6,4,2].reduce((a,b)=>
+    Math.abs(b-qty)<Math.abs(a-qty)?b:a);
+  const r = t[closest];
+  return r ? (r.du||r.u||0) : 0;
+}
+
+function onPriceTypeChange(){
+  const pt  = document.getElementById('np-pricetype').value;
+  const qty = parseInt(document.getElementById('np-qty').value)||6;
+  if(pt!=='custom'){
+    const u = getUnitFromTable(pt, qty);
+    if(u!==null) document.getElementById('np-unit').value = u;
+  }
+  updateNpPreview();
+}
+
+function onNpQtyChange(){
+  // 수가 구분이 custom이 아닐 경우 수가표에서 단가 재조회
+  const pt  = document.getElementById('np-pricetype').value;
+  const qty = parseInt(document.getElementById('np-qty').value)||6;
+  if(pt!=='custom'){
+    const u = getUnitFromTable(pt, qty);
+    if(u!==null) document.getElementById('np-unit').value = u;
+  }
+  updateNpPreview();
+}
+
+function onNpUnitChange(){
+  // 단가를 직접 수정하면 수가 구분을 직접입력으로 전환
+  document.getElementById('np-pricetype').value = 'custom';
+  updateNpPreview();
+}
+
+// ══════════════════════════════════════════════
+// 스케줄러 모달 수가표 팝업
+// ══════════════════════════════════════════════
+const MODAL_PT_LABEL = {norm:'정가',rnose:'리뷰할인(코밑)',rface:'리뷰할인(얼굴)',qty:'갯수할인',custom:'직접입력'};
+
+function buildModalPricePanels(){
+  const panels = {norm:'mpanel-norm',rnose:'mpanel-rnose',rface:'mpanel-rface',qty:'mpanel-qty'};
+  Object.entries(panels).forEach(([s, panelId])=>{
+    const panel = document.getElementById(panelId);
+    if(!panel) return;
+    const isSimple = TYPE[s]==='simple';
+    let html = `<table class="ptbl-sm"><thead><tr>
+      <th style="text-align:center">갯수</th>
+      ${isSimple ? '<th>단가(₩)</th><th>합계(₩)</th><th>10%↓(₩)</th>'
+                 : '<th>할인율</th><th>할인단가(₩)</th><th>합계(₩)</th><th>10%↓(₩)</th>'}
+    </tr></thead><tbody>`;
+    QTY.forEach(q=>{
+      const r   = tbl[s][q]||{};
+      const unit  = isSimple ? (r.u||0) : (r.du||0);
+      const total = unit*q;
+      const d10   = Math.round(total*0.9);
+      if(isSimple){
+        html += `<tr onclick="applyModalPrice('${s}',${q},${unit})" title="클릭하여 선택">
+          <td>${q}개</td>
+          <td>₩${unit.toLocaleString()}</td>
+          <td style="color:var(--gold);font-weight:700">₩${total.toLocaleString()}</td>
+          <td style="color:#7a5010">₩${d10.toLocaleString()}</td>
+        </tr>`;
+      } else {
+        const d = r.d||0;
+        html += `<tr onclick="applyModalPrice('${s}',${q},${unit})" title="클릭하여 선택">
+          <td>${q}개</td>
+          <td style="color:#1a6b3c">${d}%</td>
+          <td style="color:#1a6b3c">₩${unit.toLocaleString()}</td>
+          <td style="color:var(--gold);font-weight:700">₩${total.toLocaleString()}</td>
+          <td style="color:#7a5010">₩${d10.toLocaleString()}</td>
+        </tr>`;
+      }
+    });
+    html += '</tbody></table>';
+    panel.innerHTML = html;
+  });
+}
+
+function openModalPricePopup(){
+  buildModalPricePanels();
+  const popup = document.getElementById('modal-price-popup');
+  if(popup) popup.style.display='block';
+}
+function closeModalPricePopup(){
+  const popup = document.getElementById('modal-price-popup');
+  if(popup) popup.style.display='none';
+}
+
+function switchModalPTab(s, btn){
+  // 탭 버튼 활성화
+  document.querySelectorAll('.price-popup-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // 패널 전환
+  ['norm','rnose','rface','qty'].forEach(id=>{
+    const el=document.getElementById('mpanel-'+id);
+    if(el) el.classList.toggle('active', id===s);
+  });
+  // 현재 수가 구분 select도 변경
+  const ptEl = document.getElementById('m-pricetype');
+  if(ptEl) ptEl.value = s;
+}
+
+function applyModalPrice(s, q, unit){
+  // 수량 설정
+  document.getElementById('m-qty').value = q;
+  document.getElementById('m-qty-d').textContent = q;
+  // 단가 설정
+  document.getElementById('m-unit').value = unit;
+  // 수가 구분 설정
+  const ptEl = document.getElementById('m-pricetype');
+  if(ptEl) ptEl.value = s;
+  // 선택된 행 하이라이트
+  document.querySelectorAll('.ptbl-sm tr').forEach(r=>r.classList.remove('psel'));
+  event.currentTarget.classList.add('psel');
+  // 예상 매출 자동 계산
+  calcModalPreview();
+  // 팝업 닫기
+  closeModalPricePopup();
+}
+
+function onModalPriceTypeChange(){
+  const pt = document.getElementById('m-pricetype').value;
+  if(pt==='custom'){
+    closeModalPricePopup();
+  } else {
+    openModalPricePopup();
+    // 해당 탭으로 자동 이동
+    const tabBtns = document.querySelectorAll('.price-popup-tab');
+    const idx = ['norm','rnose','rface','qty'].indexOf(pt);
+    if(idx>=0 && tabBtns[idx]) switchModalPTab(pt, tabBtns[idx]);
+    // 현재 수량에 맞는 단가 자동 세팅
+    const qty = parseInt(document.getElementById('m-qty').value)||6;
+    const u = getUnitFromTable(pt, qty);
+    if(u!==null) document.getElementById('m-unit').value=u;
+    calcModalPreview();
+  }
+}
+
+function onModalUnitInput(){
+  const ptEl = document.getElementById('m-pricetype');
+  if(ptEl) ptEl.value='custom';
+  closeModalPricePopup();
+}
+
+function calcModalPreview(){
+  const qty  = parseInt(document.getElementById('m-qty')?.value)||0;
+  const unit = parseFloat(document.getElementById('m-unit')?.value)||0;
+  const dep  = parseInt(document.getElementById('m-dep')?.value)||0;
+  const base = qty*unit;
+  const rev  = dep ? Math.round(base*0.9) : base;
+  const revEl = document.getElementById('m-rev');
+  if(revEl && base>0) revEl.value = rev;
+}
+
+function onProcTypeChange(){
+  const sel = document.getElementById('m-proc-type').value;
+  const inp = document.getElementById('m-proc');
+  if(sel && sel !== 'custom'){
+    inp.value = sel;
+    inp.style.opacity = '0.5';
+    inp.readOnly = true;
+  } else {
+    inp.value = sel === 'custom' ? '' : '';
+    inp.style.opacity = '1';
+    inp.readOnly = false;
+    inp.focus();
+  }
+}
+
+function setMDep(v, silent){
+  document.getElementById('m-dep').value=v;
+  const offBtn=document.getElementById('m-dep-off');
+  const onBtn =document.getElementById('m-dep-on');
+  if(offBtn) offBtn.className= v===0 ? 'dt-off active-off':'dt-off';
+  if(onBtn)  onBtn.className = v===1 ? 'dt-on  active-on' :'dt-on';
+  if(!silent) calcModalPreview();
+}
+
+function setDep(v){
+  document.getElementById('np-dep').value = v;
+  // 토글 버튼 스타일
+  document.getElementById('dep-off-btn').className = v===0 ? 'dt-off active-off' : 'dt-off';
+  document.getElementById('dep-on-btn').className  = v===1 ? 'dt-on  active-on'  : 'dt-on';
+  // 결과박스 즉시 갱신
+  _renderRB();
+  updateNpPreview();
+}
+
+function updateNpPreview(){
+  const qty  = parseInt(document.getElementById('np-qty')?.value)||0;
+  const unit = parseFloat(document.getElementById('np-unit')?.value)||0;
+  const dep  = parseInt(document.getElementById('np-dep')?.value)||0;
+  const base = qty * unit;
+  const final = dep ? Math.round(base*0.9) : base;
+  const el = document.getElementById('np-preview');
+  if(el){
+    el.textContent = '₩'+final.toLocaleString();
+    el.style.color = dep ? '#fde68a' : 'var(--gold-light)';
+  }
+}
+
+// 환자는 스케줄러에서 등록 — 수동 추가 비활성화
+function addPatient(){
+  showToast('스케줄러(04번)에서 환자를 등록해주세요');
+}
+function removePatient(id){ renderSchRevDetail(); calcAll(); }
+
+// renderPatients → scheduleData 기반으로 통합
+function renderPatients(){
+  renderSchRevDetail();
+}
+
+// ══════════════════════════════════════════════
+// KPI 계산
+// ══════════════════════════════════════════════
+function calcRevFromPatients(){
+  // scheduleData 기반으로 직접 계산
+  const slots = Object.values(scheduleData).filter(s=>s && s.name && s.status!=='취소');
+  let totalPay=0, totalKR=0, totalJP=0;
+  slots.forEach(function(s){
+    const qty=Number(s.qty)||0, unit=Number(s.unit)||0;
+    const dep=(s.dep&&Number(s.dep)>0)?1:0;
+    const caseType=s.case==='A'?'A':'B';
+    const base=qty*unit;
+    const pay=dep?Math.round(base*0.9):base;
+    const revPay=(pay>0)?pay:(Number(s.rev)||0);
+    const revKR=(pay>0)?(caseType==='A'?Math.round(pay*0.5):pay):(caseType==='A'?Math.round(revPay*0.5):revPay);
+    const revJP=(pay>0)?(caseType==='A'?Math.round(pay*0.5):0):(caseType==='A'?Math.round(revPay*0.5):0);
+    totalPay+=revPay; totalKR+=revKR; totalJP+=revJP;
+  });
+  window._simRevKR=totalKR; window._simRevJP=totalJP; window._simRevTotal=totalPay;
+  return {totalPay, totalKR, totalJP};
+}
+
+document.addEventListener('DOMContentLoaded', init);
+
+// ══════════════════════════════════════════════════════════════
+// FIREBASE — 실시간 멀티유저 동기화
+// ══════════════════════════════════════════════════════════════
+let _db=null, _fbConnected=false, _sessionKey='default';
+let _unsubs=[], _isFbUpdate=false;
+var _mgrSaveTimer=null;
+
+function openFbPanel(){
+  try{
+    const saved=localStorage.getItem('bf_fb_config');
+    if(saved){const c=JSON.parse(saved);['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{const el=document.getElementById('fb-'+k);if(el&&c[k])el.value=c[k];});}
+    const sk=localStorage.getItem('bf_session_key');
+    if(sk) document.getElementById('fb-session-key').value=sk;
+  }catch(e){}
+  document.getElementById('fb-panel').style.display='flex';
+}
+function closeFbPanel(){document.getElementById('fb-panel').style.display='none';}
+
+function parseFbJson(){
+  const raw=document.getElementById('fb-json-input').value.trim();
+  try{
+    const jsonStr=raw.replace(/^[^{]*/,'').replace(/[^}]*$/,'');
+    const c=JSON.parse(jsonStr);
+    ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{const el=document.getElementById('fb-'+k);if(el&&c[k])el.value=c[k];});
+    showFbStatus('JSON에서 설정을 가져왔습니다.','ok');
+  }catch(e){showFbStatus('JSON 파싱 실패: '+e.message,'err');}
+}
+
+function connectFb(){
+  const config={
+    apiKey:document.getElementById('fb-apiKey').value.trim(),
+    authDomain:document.getElementById('fb-authDomain').value.trim(),
+    projectId:document.getElementById('fb-projectId').value.trim(),
+    storageBucket:document.getElementById('fb-storageBucket').value.trim(),
+    messagingSenderId:document.getElementById('fb-messagingSenderId').value.trim(),
+    appId:document.getElementById('fb-appId').value.trim(),
+  };
+  const sk=document.getElementById('fb-session-key').value.trim()||'default';
+  if(!config.apiKey||!config.projectId||!config.appId){showFbStatus('apiKey, projectId, appId는 필수입니다.','err');return;}
+  showFbStatus('연결 중...','connecting'); setSyncStatus('connecting','Firebase 연결 중...');
+  try{
+    let app; try{app=firebase.app();}catch(e){app=firebase.initializeApp(config);}
+    _db=firebase.firestore(); _sessionKey=sk; _fbConnected=true;
+    localStorage.setItem('bf_fb_config',JSON.stringify(config));
+    localStorage.setItem('bf_session_key',sk);
+    _db.collection('sessions').doc(_sessionKey).set({lastConnected:firebase.firestore.FieldValue.serverTimestamp(),sessionKey:_sessionKey},{merge:true})
+    .then(()=>{
+      showFbStatus('연결 성공! 실시간 동기화 활성화','ok'); setFbBadge('ok');
+      document.getElementById('fb-disconnect-btn').style.display='';
+      document.getElementById('fb-connect-btn').textContent='재연결';
+      _unsubs.forEach(u=>u()); _unsubs=[];
+      subscribeAll();
+      closeFbPanel();
+      setTimeout(()=>{fbSaveSettings();fbSaveEventInfo();},800);
+      // heartbeat: 30초마다 연결 상태 확인
+      clearInterval(window._fbHeartbeat);
+      window._fbHeartbeat = setInterval(function(){
+        if(!_fbConnected) return;
+        _db.collection('sessions').doc(_sessionKey).get()
+          .then(()=>setSyncStatus('saved','실시간 동기화 중 — '+_sessionKey))
+          .catch(()=>{
+            setSyncStatus('error','연결 끊김 — 재연결 시도...');
+            setFbBadge('connecting');
+            setTimeout(connectFb, 2000);
+          });
+      }, 30000);
+    }).catch(err=>{showFbStatus('Firestore 접근 실패: '+err.message,'err');setFbBadge('err');setSyncStatus('error','연결 오류');_fbConnected=false;});
+  }catch(err){showFbStatus('초기화 실패: '+err.message,'err');setFbBadge('err');_fbConnected=false;}
+}
+
+function disconnectFb(){
+  _unsubs.forEach(u=>u()); _unsubs=[];
+  _fbConnected=false; _db=null;
+  setFbBadge('idle'); setSyncStatus('idle','Firebase 미연결 — 로컬 모드');
+  document.getElementById('fb-disconnect-btn').style.display='none';
+  document.getElementById('fb-connect-btn').textContent='🔥 연결';
+  showFbStatus('연결이 해제되었습니다.','idle');
+}
+
+function showFbStatus(msg,type){
+  const el=document.getElementById('fb-connect-status');if(!el)return;
+  el.style.display='block';
+  const bg={ok:'var(--green-bg)',err:'var(--red-bg)',connecting:'var(--amber-bg)',idle:'var(--bg-2)'};
+  const col={ok:'var(--green)',err:'var(--red)',connecting:'var(--amber)',idle:'var(--tx-500)'};
+  const bd={ok:'var(--green-bd)',err:'var(--red-bd)',connecting:'var(--amber-bd)',idle:'var(--bg-3)'};
+  el.style.background=bg[type]||bg.idle; el.style.color=col[type]||col.idle;
+  el.style.border='1px solid '+(bd[type]||bd.idle); el.textContent=msg;
+}
+function setFbBadge(type){
+  const el=document.getElementById('fb-status-badge');if(!el)return;
+  const m={ok:['fb-ok','✅ 실시간 동기화 중'],err:['fb-err','❌ 오류'],idle:['fb-idle','⚡ 미연결'],connecting:['fb-connecting','🔄 연결 중']};
+  const [cls,txt]=m[type]||m.idle; el.className='fb-status '+cls; el.textContent=txt;
+}
+function setSyncStatus(type,msg){
+  const dot=document.getElementById('sync-dot'),txt=document.getElementById('sync-status-text');
+  if(dot)dot.className='sync-dot '+type; if(txt)txt.textContent=msg;
+}
+function flashSave(msg){
+  setSyncStatus('saving',msg||'저장 중...');
+  setTimeout(()=>{if(_fbConnected)setSyncStatus('saved','실시간 동기화 중 — '+_sessionKey);},1500);
+}
+function sDoc(){return _db.collection('sessions').doc(_sessionKey);}
+function fbSet(ref,data,merge){
+  if(!_db||!_fbConnected)return;
+  if(merge===undefined)merge=true;
+  flashSave();
+  ref.set(data,{merge}).catch(err=>setSyncStatus('error','저장 오류: '+err.message));
+}
+function fbDel(ref){
+  if(!_db||!_fbConnected)return;
+  ref.delete().catch(err=>setSyncStatus('error','삭제 오류: '+err.message));
+}
+
+// ── 실시간 구독 ─────────────────────────────
+function subscribeAll(){
+  if(!_db||!_fbConnected)return;
+  setSyncStatus('saved','실시간 동기화 중 — '+_sessionKey);
+
+  // 1) 스케줄러 — 오류 시 5초 후 재연결
+  const u1=sDoc().collection('schedule').onSnapshot(function(snap){
+    _isFbUpdate=true;
+    Object.keys(scheduleData).forEach(k=>delete scheduleData[k]);
+    snap.forEach(function(doc){scheduleData[doc.id]=doc.data();});
+    renderSchedule();
+    _isFbUpdate=false;
+    syncSchToPatients();
+    renderStatIfOpen();
+  },function(err){
+    console.warn('[FB] schedule:',err);
+    setSyncStatus('error','동기화 오류 — 재연결 시도 중...');
+    setTimeout(function(){ if(_fbConnected) subscribeAll(); }, 5000);
+  });
+
+  // 2) 고정 비용
+  const u2=sDoc().collection('costs').doc('fixed').onSnapshot(function(snap){
+    if(!snap.exists)return;
+    _isFbUpdate=true;
+    const d=snap.data();
+    ['c-rent-jpy','c-rate','c-rent-krw','c-mkt','c-misc','c-travel'].forEach(function(k){
+      const el=document.getElementById(k);
+      if(el&&d[k]!==undefined&&document.activeElement!==el)el.value=d[k];
+    });
+    calcAll();
+    _isFbUpdate=false;
+  },function(err){console.warn('[FB] costs:',err);});
+
+  // 3) 인건비
+  const u3=sDoc().collection('staff').orderBy('order','asc').onSnapshot(function(snap){
+    _isFbUpdate=true;
+    Object.keys(staffData).forEach(function(id){const el=document.getElementById('sr-'+id);if(el)el.remove();});
+    Object.keys(staffData).forEach(k=>delete staffData[k]);
+    const listEl=document.getElementById('staff-list');if(listEl)listEl.innerHTML='';
+    staffCnt=0;
+    if(snap.empty){_isFbUpdate=false;loadDefaultsIfEmpty();}
+    else{
+      snap.forEach(function(doc){
+        const d=doc.data();
+        addStaff(d.role||'',d.rate||0,d.unit||'일당',d.count||1,d.hours||8);
+        if(staffData[staffCnt])staffData[staffCnt]._docId=doc.id;
+      });
+      calcAll(); _isFbUpdate=false;
+    }
+  },function(err){console.warn('[FB] staff:',err);_isFbUpdate=false;loadDefaultsIfEmpty();});
+
+  // 4) 메모
+  const u4=sDoc().collection('memos').orderBy('order','asc').onSnapshot(function(snap){
+    _isFbUpdate=true;
+    memos=[];
+    snap.forEach(function(doc){memos.push(Object.assign({},doc.data(),{_docId:doc.id}));});
+    renderMemos();
+    _isFbUpdate=false;
+  },function(err){console.warn('[FB] memos:',err);});
+
+  // 5) 이벤트 정보
+  const u5=sDoc().onSnapshot(function(snap){
+    if(!snap.exists)return;
+    _isFbUpdate=true;
+    const d=snap.data();
+    const dateEl=document.getElementById('event-date');
+    const locEl=document.getElementById('event-location');
+    if(d.eventDate&&dateEl&&document.activeElement!==dateEl)dateEl.value=d.eventDate;
+    if(d.eventLocation&&locEl&&document.activeElement!==locEl)locEl.value=d.eventLocation;
+    updateInfoBar();
+    _isFbUpdate=false;
+  },function(err){console.warn('[FB] session:',err);});
+
+  // 6) 설정 (실장 목록)
+  const u6=sDoc().collection('settings').doc('general').onSnapshot(function(snap){
+    if(!snap.exists)return;
+    _isFbUpdate=true;
+    const d=snap.data();
+    if(d.mgrs&&Array.isArray(d.mgrs)&&d.mgrs.length>0){
+      d.mgrs.forEach(function(dm){
+        const existing=getMgrById(dm.id);
+        if(existing){
+          const inp=document.querySelector('[data-mgr-id="'+dm.id+'"] [data-inp]');
+          if(!inp||document.activeElement!==inp)existing.name=dm.name;
+          existing.colorIdx=dm.colorIdx;
+        } else {mgrs.push(dm);}
+      });
+      mgrs=mgrs.filter(function(m){return d.mgrs.some(function(dm){return dm.id===m.id;});});
+      mgrNextId=mgrs.length;
+    }
+    if(d.slotMgrs)slotMgrs=d.slotMgrs;
+    buildMgrBar(); renderSchedule();
+    _isFbUpdate=false;
+  },function(err){console.warn('[FB] settings:',err);});
+
+  _unsubs=[u1,u2,u3,u4,u5,u6];
+}
+
+// ── 저장 함수들 ─────────────────────────────
+function fbSaveSlot(key,data,force){
+  if(!_db||!_fbConnected)return;
+  if(_isFbUpdate&&!force)return;
+  try{fbSet(sDoc().collection('schedule').doc(key),JSON.parse(JSON.stringify(data||{})));}catch(e){}
+}
+function fbDelSlot(key){if(!_db||!_fbConnected||_isFbUpdate)return;fbDel(sDoc().collection('schedule').doc(key));}
+function fbSaveFixedCosts(){
+  if(!_db||!_fbConnected||_isFbUpdate)return;
+  const data={};
+  ['c-rent-jpy','c-rate','c-rent-krw','c-mkt','c-misc','c-travel'].forEach(k=>{const el=document.getElementById(k);if(el)data[k]=parseFloat(el.value)||0;});
+  fbSet(sDoc().collection('costs').doc('fixed'),data);
+}
+function fbSaveStaff(id,order){
+  if(!_db||!_fbConnected||_isFbUpdate)return;
+  const s=staffData[id];if(!s)return;
+  const docId=s._docId||('staff_'+id);
+  if(!s._docId)staffData[id]._docId=docId;
+  fbSet(sDoc().collection('staff').doc(docId),{role:s.role||'',rate:s.rate||0,unit:s.unit||'일당',count:s.count||1,hours:s.hours||8,order:order!=null?order:parseInt(id)});
+}
+function fbDelStaff(docId){if(!_db||!_fbConnected||_isFbUpdate||!docId)return;fbDel(sDoc().collection('staff').doc(docId));}
+function fbSaveMemo(m){
+  if(!_db||!_fbConnected||_isFbUpdate)return;
+  const docId=m._docId||('memo_'+m.id);
+  if(!m._docId)m._docId=docId;
+  try{fbSet(sDoc().collection('memos').doc(docId),JSON.parse(JSON.stringify(Object.assign({},m,{order:m.id}))));}catch(e){}
+}
+function fbDelMemo(m){if(!_db||!_fbConnected||_isFbUpdate||!m._docId)return;fbDel(sDoc().collection('memos').doc(m._docId));}
+function fbSaveEventInfo(){
+  if(!_db||!_fbConnected||_isFbUpdate)return;
+  const locSel=document.getElementById('event-location');
+  const dateSel=document.getElementById('event-date');
+  fbSet(sDoc(),{eventDate:dateSel?dateSel.value:'',eventLocation:locSel?locSel.value:'',updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+}
+function fbSaveSettings(){
+  if(!_db||!_fbConnected||_isFbUpdate)return;
+  try{fbSet(sDoc().collection('settings').doc('general'),{mgrs:JSON.parse(JSON.stringify(mgrs)),slotMgrs:JSON.parse(JSON.stringify(slotMgrs)),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}
+}
+function fbSavePriceTable(s){
+  if(!_db||!_fbConnected||_isFbUpdate||!tbl[s])return;
+  const data={};
+  QTY.forEach(function(q){try{data[String(q)]=JSON.parse(JSON.stringify(tbl[s][q]||{}));}catch(e){}});
+  fbSet(sDoc().collection('pricetable').doc(s),data);
+}
+
+// ── DOMContentLoaded 패치 ───────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  // saveSlot
+  const _oSave=window.saveSlot;
+  window.saveSlot=function(){
+    const key=curSlot;
+    _oSave.call(this);
+    if(!_isFbUpdate&&key&&scheduleData[key]){fbSaveSlot(key,scheduleData[key],true);fbSaveSettings();}
+    fbSaveEventInfo();
+    showSaveToast();
+  };
+  // deleteSlot
+  const _oDel=window.deleteSlot;
+  window.deleteSlot=function(){
+    const key=curSlot;
+    _oDel.call(this);
+    if(!_isFbUpdate&&key)fbDelSlot(key);
+  };
+  // addStaff
+  const _oAS=window.addStaff;
+  window.addStaff=function(role,rate,unit,count,hours){
+    _oAS.call(this,role,rate,unit,count,hours);
+    if(!_isFbUpdate)fbSaveStaff(staffCnt,staffCnt);
+  };
+  // removeStaff
+  const _oRS=window.removeStaff;
+  window.removeStaff=function(id){
+    const docId=staffData[id]&&staffData[id]._docId;
+    _oRS.call(this,id);
+    if(!_isFbUpdate)fbDelStaff(docId);
+  };
+  // calcAll debounce → 비용 저장
+  let _staffTimer=null;
+  const _oCalcAll=window.calcAll;
+  window.calcAll=function(){
+    _oCalcAll.call(this);
+    if(!_isFbUpdate){clearTimeout(_staffTimer);_staffTimer=setTimeout(function(){Object.keys(staffData).forEach(function(id){fbSaveStaff(id,parseInt(id)||0);});fbSaveFixedCosts();},1000);}
+  };
+  // addMemo
+  const _oAM=window.addMemo;
+  window.addMemo=function(){
+    const prevLen=memos.length,prevEditId=window.editingMemoId;
+    _oAM.call(this);
+    if(_isFbUpdate)return;
+    if(memos.length>prevLen){fbSaveMemo(memos[memos.length-1]);}
+    else if(prevEditId!=null){const m=memos.find(x=>x.id===prevEditId);if(m)fbSaveMemo(m);}
+  };
+  // deleteMemo
+  const _oDM=window.deleteMemo;
+  window.deleteMemo=function(id){
+    const m=memos.find(x=>x.id===id);
+    _oDM.call(this,id);
+    if(!_isFbUpdate&&m)fbDelMemo(m);
+  };
+  // saveCurrentTable
+  const _oSCT=window.saveCurrentTable;
+  if(_oSCT) window.saveCurrentTable=function(){_oSCT.call(this);if(!_isFbUpdate)fbSavePriceTable(curSub);};
+  // 비용 필드 change
+  ['c-rent-jpy','c-rate','c-rent-krw','c-mkt','c-misc','c-travel'].forEach(function(k){
+    const el=document.getElementById(k);
+    if(el)el.addEventListener('change',function(){if(!_isFbUpdate)fbSaveFixedCosts();});
+  });
+  // 날짜·장소 change
+  const dateEl2=document.getElementById('event-date');
+  if(dateEl2)dateEl2.addEventListener('change',function(){if(!_isFbUpdate)fbSaveEventInfo();});
+  const locEl2=document.getElementById('event-location');
+  if(locEl2)locEl2.addEventListener('change',function(){if(!_isFbUpdate)fbSaveEventInfo();});
+
+  // 자동 연결
+  const DEFAULT_CONFIG={apiKey:'AIzaSyDXFDLXThLaW6D1ORVNp6Iz6ApMHAkRu5o',authDomain:'blackfilm-survey.firebaseapp.com',projectId:'blackfilm-survey',storageBucket:'blackfilm-survey.firebasestorage.app',messagingSenderId:'360900276842',appId:'1:360900276842:web:90f46bcbf8dd42379ad013'};
+  try{
+    const saved=localStorage.getItem('bf_fb_config');
+    const sk=localStorage.getItem('bf_session_key');
+    const cfg=saved?JSON.parse(saved):DEFAULT_CONFIG;
+    const sessionKey=sk||'default';
+    if(cfg.apiKey&&cfg.projectId&&cfg.appId){
+      ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(function(k){const el=document.getElementById('fb-'+k);if(el&&cfg[k])el.value=cfg[k];});
+      document.getElementById('fb-session-key').value=sessionKey;
+      setTimeout(connectFb,400);
+    } else {loadDefaultsIfEmpty();}
+  }catch(e){console.warn('[FB] 자동연결 실패:',e);loadDefaultsIfEmpty();}
+},{once:true});
+
+
+</script>
+
+
+
+<!-- Firebase 설정 패널 -->
+<div id="fb-panel" style="display:none;position:fixed;inset:0;background:rgba(28,26,23,.7);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center">
+  <div style="background:var(--bg-0);border:1px solid var(--bg-3);border-top:3px solid var(--gold);border-radius:8px;box-shadow:0 20px 60px rgba(28,26,23,.2);width:600px;max-width:96vw;max-height:94vh;overflow-y:auto">
+    <div style="padding:18px 22px;border-bottom:1px solid var(--bg-2);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--tx-900)">🔥 Firebase 설정</div>
+        <div style="font-size:11px;color:var(--tx-500);margin-top:2px">Firestore 연결 정보를 입력하면 데이터가 실시간으로 저장·불러와집니다</div>
+      </div>
+      <button onclick="closeFbPanel()" style="background:none;border:none;color:var(--tx-300);font-size:22px;cursor:pointer;padding:0 6px;line-height:1">&times;</button>
+    </div>
+    <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">
+      <div style="background:var(--gold-pale);border:1px solid var(--gold-bright);border-radius:4px;padding:12px 14px;font-size:11px;color:var(--tx-700);line-height:1.8">
+        <div style="font-weight:700;color:var(--gold-dim);margin-bottom:4px">📋 연결 방법</div>
+        1. <a href="https://console.firebase.google.com" target="_blank" style="color:var(--blue)">Firebase Console</a> → blackfilm-survey 프로젝트<br>
+        2. Firestore Database → 보안 규칙을 테스트 모드로 설정<br>
+        3. 프로젝트 설정 → 내 앱 → SDK 구성 복사 후 아래 입력 → 연결
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label class="lbl" style="margin-bottom:3px">apiKey *</label><input type="text" id="fb-apiKey" class="inp" placeholder="AIzaSy..." style="font-size:11px;font-family:monospace"></div>
+        <div><label class="lbl" style="margin-bottom:3px">authDomain</label><input type="text" id="fb-authDomain" class="inp" placeholder="blackfilm-survey.firebaseapp.com" style="font-size:11px;font-family:monospace"></div>
+        <div><label class="lbl" style="margin-bottom:3px">projectId *</label><input type="text" id="fb-projectId" class="inp" placeholder="blackfilm-survey" style="font-size:11px;font-family:monospace"></div>
+        <div><label class="lbl" style="margin-bottom:3px">storageBucket</label><input type="text" id="fb-storageBucket" class="inp" placeholder="blackfilm-survey.firebasestorage.app" style="font-size:11px;font-family:monospace"></div>
+        <div><label class="lbl" style="margin-bottom:3px">messagingSenderId</label><input type="text" id="fb-messagingSenderId" class="inp" placeholder="360900276842" style="font-size:11px;font-family:monospace"></div>
+        <div><label class="lbl" style="margin-bottom:3px">appId *</label><input type="text" id="fb-appId" class="inp" placeholder="1:360900276842:web:..." style="font-size:11px;font-family:monospace"></div>
+      </div>
+      <div>
+        <label class="lbl" style="margin-bottom:3px">또는 firebaseConfig JSON 붙여넣기</label>
+        <textarea id="fb-json-input" class="inp" style="font-family:monospace;font-size:10px;min-height:80px;line-height:1.5" placeholder='{"apiKey":"...","projectId":"..."}'></textarea>
+        <button onclick="parseFbJson()" style="margin-top:6px;background:var(--gold-pale);border:1px solid var(--gold-bright);color:var(--gold-dim);padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;border-radius:3px;font-family:'Malgun Gothic',sans-serif">JSON에서 자동 채우기</button>
+      </div>
+      <div>
+        <label class="lbl" style="margin-bottom:3px">상담회 날짜 (Firestore 문서 구분 키)</label>
+        <input type="text" id="fb-session-key" class="inp" placeholder="예: 2025-06-15_ginza" style="font-size:11px;width:260px">
+        <div style="font-size:10px;color:var(--tx-300);margin-top:3px">같은 날짜/장소 상담회의 데이터를 분리하는 식별자</div>
+      </div>
+      <div id="fb-connect-status" style="display:none;padding:10px 14px;border-radius:4px;font-size:11px;font-weight:700"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--bg-2);padding-top:14px">
+        <button onclick="disconnectFb()" class="btn-out" id="fb-disconnect-btn" style="display:none">연결 해제</button>
+        <button onclick="closeFbPanel()" class="btn-out">닫기</button>
+        <button onclick="connectFb()" class="btn-gold" id="fb-connect-btn">🔥 연결</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+</body>
+</html>
+</body>
+</html>
